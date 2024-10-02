@@ -42,19 +42,19 @@ public class OrderController {
         return ResponseEntity.ok(new OrderResponse(order));
     }
 
-    @PutMapping("/{id}/invoice")
+    @PatchMapping("/{id}/invoice")
     public ResponseEntity<?> updateInvoiceNumber(@PathVariable("id") Long id, @Valid @RequestBody OrderUpdateRequest.InvoiceNumber request) {
         orderService.updateInvoiceNumber(id, request);
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping("/{id}/status")
+    @PatchMapping("/{id}/status")
     public ResponseEntity<?> updateStatus(@PathVariable("id") Long id, @Valid @RequestBody OrderUpdateRequest.Status request) {
         orderService.updateStatus(id, request);
         return ResponseEntity.ok().build();
     }
 
-    @PutMapping("/{id}/address")
+    @PatchMapping("/{id}/address")
     public ResponseEntity<?> updateAddress(@PathVariable("id") Long id, @Valid @RequestBody OrderUpdateRequest.Address request) {
         orderService.updateAddress(id, request);
         return ResponseEntity.ok().build();
