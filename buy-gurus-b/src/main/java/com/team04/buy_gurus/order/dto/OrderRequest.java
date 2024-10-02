@@ -40,7 +40,7 @@ public class OrderRequest {
         private String name;
 
         @NotBlank(message = "전화번호는 필수 입력 사항입니다.")
-        @Pattern(regexp = "^(01[01346-9])-?([1-9]{1}[0-9]{3})-?([0-9]{4})$", message = "전화번호는 010-XXXX-XXXX 형태입니다.")
+        @Pattern(regexp = "^(010)-?([1-9]{1}[0-9]{3})-?([0-9]{4})$", message = "전화번호는 010-XXXX-XXXX 또는 하이픈이 빠진 형태입니다.")
         private String phoneNum;
     }
 }

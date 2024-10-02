@@ -43,19 +43,19 @@ public class OrderController {
     }
 
     @PutMapping("/{id}/invoice")
-    public ResponseEntity<?> updateInvoiceNumber(@PathVariable("id") Long id, @RequestBody OrderUpdateRequest.InvoiceNumber request) {
+    public ResponseEntity<?> updateInvoiceNumber(@PathVariable("id") Long id, @Valid @RequestBody OrderUpdateRequest.InvoiceNumber request) {
         orderService.updateInvoiceNumber(id, request);
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/{id}/status")
-    public ResponseEntity<?> updateStatus(@PathVariable("id") Long id, @RequestBody OrderUpdateRequest.Status request) {
+    public ResponseEntity<?> updateStatus(@PathVariable("id") Long id, @Valid @RequestBody OrderUpdateRequest.Status request) {
         orderService.updateStatus(id, request);
         return ResponseEntity.ok().build();
     }
 
     @PutMapping("/{id}/address")
-    public ResponseEntity<?> updateAddress(@PathVariable("id") Long id, @RequestBody OrderUpdateRequest.Address request) {
+    public ResponseEntity<?> updateAddress(@PathVariable("id") Long id, @Valid @RequestBody OrderUpdateRequest.Address request) {
         orderService.updateAddress(id, request);
         return ResponseEntity.ok().build();
     }

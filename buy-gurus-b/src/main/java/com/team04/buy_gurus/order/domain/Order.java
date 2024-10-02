@@ -84,7 +84,7 @@ public class Order {
     public void setAddress(OrderUpdateRequest.Address request) {
         this.shippingAddress = request.getAddress();
         this.customerName = request.getName();
-        this.customerPhoneNum = request.getPhoneNumber();
+        this.customerPhoneNum = request.getPhoneNum();
     }
 
     public static Status fromString(String status) {

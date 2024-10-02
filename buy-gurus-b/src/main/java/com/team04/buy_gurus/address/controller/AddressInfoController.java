@@ -5,6 +5,7 @@ import com.team04.buy_gurus.address.dto.AddressInfoRequest;
 import com.team04.buy_gurus.address.dto.AddressInfoResponse;
 import com.team04.buy_gurus.address.repository.AddressInfoRepository;
 import com.team04.buy_gurus.address.service.AddressInfoService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +20,7 @@ public class AddressInfoController {
     private final AddressInfoService addressInfoService;
 
     @PostMapping
-    public ResponseEntity<?> addAddress(@RequestBody AddressInfoRequest addressInfoRequest) {
+    public ResponseEntity<?> addAddress(@Valid @RequestBody AddressInfoRequest addressInfoRequest) {
         addressInfoService.save(addressInfoRequest);
         return ResponseEntity.ok().build();
     }
@@ -38,7 +39,7 @@ public class AddressInfoController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateAddress(@PathVariable Long id, @RequestBody AddressInfoRequest addressInfoRequest) {
+    public ResponseEntity<?> updateAddress(@PathVariable Long id, @Valid @RequestBody AddressInfoRequest addressInfoRequest) {
         addressInfoService.update(id, addressInfoRequest);
         return ResponseEntity.ok().build();
     }
