@@ -36,7 +36,7 @@ public class S3BucketController {
     }
 
     @DeleteMapping("/one")
-    public ResponseEntity<String> deleteFile(@RequestBody S3BucketRemove.Filename req) {
+    public ResponseEntity<String> deleteFile(@RequestBody S3BucketRemoveRequest.Filename req) {
         try {
             s3BucketService.remove(req.getFilename());
         } catch (Exception e) {
@@ -46,7 +46,7 @@ public class S3BucketController {
     }
 
     @DeleteMapping("/many")
-    public ResponseEntity<?> deleteFiles(@RequestBody S3BucketRemove.Filenames req) {
+    public ResponseEntity<?> deleteFiles(@RequestBody S3BucketRemoveRequest.Filenames req) {
         List<Boolean> result = s3BucketService.remove(req.getFilename());
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
