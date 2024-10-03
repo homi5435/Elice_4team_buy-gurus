@@ -1,9 +1,8 @@
 package com.team04.buy_gurus.order.service;
 
-import com.team04.buy_gurus.address.domain.AddressInfo;
-import com.team04.buy_gurus.address.service.AddressInfoService;
 import com.team04.buy_gurus.order.domain.Order;
 import com.team04.buy_gurus.order.domain.OrderInfo;
+import com.team04.buy_gurus.order.dto.OrderPageRequest;
 import com.team04.buy_gurus.order.dto.OrderRequest;
 import com.team04.buy_gurus.order.dto.OrderRequest.OrderInfoRequest;
 import com.team04.buy_gurus.order.dto.OrderUpdateRequest;
@@ -11,6 +10,10 @@ import com.team04.buy_gurus.order.repository.OrderInfoRepository;
 import com.team04.buy_gurus.order.repository.OrderRepository;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,15 +26,10 @@ public class OrderService {
     private OrderInfoRepository orderInfoRepository;
     private OrderRepository orderRepository;
 
-    private AddressInfoService addressInfoService;
-
     @Autowired
-    public OrderService(OrderInfoRepository orderInfoRepository,
-                        OrderRepository orderRepository,
-                        AddressInfoService addressInfoService) {
+    public OrderService(OrderInfoRepository orderInfoRepository, OrderRepository orderRepository) {
         this.orderInfoRepository = orderInfoRepository;
         this.orderRepository = orderRepository;
-        this.addressInfoService = addressInfoService;
     }
 
     private List<OrderInfo> saveOrderInfos(List<OrderInfoRequest> orderRequest) {
@@ -63,8 +61,16 @@ public class OrderService {
         return orderRepository.findById(orderId).orElse(null);
     }
 
-    public List<Order> getOrders() {
-        return orderRepository.findAll();
+    public List<Order> getOrders(OrderPageRequest.Type typeReq, OrderPageRequest.Pageable pageReq) {
+        Sort sort = Sort.by(Sort.Direction.DESC, "id");
+        Pageable pageable = PageRequest.of(pageReq.getPage() - 1, pageReq.getSize(), sort);
+        Page<Order> paged;
+        if (typeReq.getType().equals("c")) {
+            paged = orderRepository.findAllByIsDeletedFalse(pageable);
+        } else {
+            paged = orderRepository.findAllByIsDeletedFalse(pageable);
+        }
+        return paged.getContent();
     }
 
     @Transactional
