@@ -27,7 +27,7 @@ public class OrderItemController {
 
     // 장바구니 조회
     @GetMapping("api/orderitem")
-    public ResponseEntity<String> readOrderItem(@PathVariable Long user_id, Model model){
+    public ResponseEntity<String> readOrderItem(@RequestBody Long user_id, Model model){
         List<OrderItemViewDto> orderItem = orderItemService.readOrderItem(user_id);
 
         int totalAmount = 0;
