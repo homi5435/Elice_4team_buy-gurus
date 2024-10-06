@@ -1,4 +1,4 @@
-package com.team04.buy_gurus.config.oauth.handler;
+package com.team04.buy_gurus.oauth.handler;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

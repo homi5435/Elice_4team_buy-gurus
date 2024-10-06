@@ -1,4 +1,4 @@
-package com.team04.buy_gurus.config.oauth.userinfo;
+package com.team04.buy_gurus.oauth.userinfo;
 
 import java.util.Map;
 

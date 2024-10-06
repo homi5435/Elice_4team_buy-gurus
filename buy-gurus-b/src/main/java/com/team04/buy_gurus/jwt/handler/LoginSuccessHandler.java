@@ -1,15 +1,15 @@
-package com.team04.buy_gurus.config.jwt.handler;
+package com.team04.buy_gurus.jwt.handler;
 
-import com.team04.buy_gurus.config.jwt.JwtProperties;
-import com.team04.buy_gurus.config.jwt.service.JwtService;
+import com.team04.buy_gurus.jwt.service.JwtService;
 import com.team04.buy_gurus.user.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
+
+import java.io.IOException;
 
 @RequiredArgsConstructor
 public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {

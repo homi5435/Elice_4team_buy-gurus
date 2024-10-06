@@ -1,9 +1,8 @@
-package com.team04.buy_gurus.config.oauth.handler;
+package com.team04.buy_gurus.oauth.handler;
 
-import com.team04.buy_gurus.config.jwt.JwtProperties;
-import com.team04.buy_gurus.config.jwt.service.JwtService;
-import com.team04.buy_gurus.config.oauth.CustomOAuth2User;
-import com.team04.buy_gurus.user.entity.User;
+import com.team04.buy_gurus.jwt.JwtProperties;
+import com.team04.buy_gurus.jwt.service.JwtService;
+import com.team04.buy_gurus.oauth.CustomOAuth2User;
 import com.team04.buy_gurus.user.repository.UserRepository;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

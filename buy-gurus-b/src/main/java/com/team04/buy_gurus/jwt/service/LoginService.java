@@ -1,4 +1,4 @@
-package com.team04.buy_gurus.config.jwt.service;
+package com.team04.buy_gurus.jwt.service;
 
 import com.team04.buy_gurus.user.entity.User;
 import com.team04.buy_gurus.user.repository.UserRepository;
@@ -16,6 +16,7 @@ public class LoginService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("해당 이메일이 존재하지 않습니다."));
 

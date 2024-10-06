@@ -7,17 +7,19 @@ import com.team04.buy_gurus.user.entity.User;
 import com.team04.buy_gurus.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    @Transactional
     public Long signup(SignupRequestDto request) throws Exception{
 
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {

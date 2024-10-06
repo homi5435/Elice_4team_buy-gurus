@@ -1,4 +1,4 @@
-package com.team04.buy_gurus.config.oauth;
+package com.team04.buy_gurus.oauth;
 
 import com.team04.buy_gurus.user.entity.Role;
 import lombok.Getter;

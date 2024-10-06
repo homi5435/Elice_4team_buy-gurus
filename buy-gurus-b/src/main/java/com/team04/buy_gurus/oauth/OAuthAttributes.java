@@ -1,9 +1,9 @@
-package com.team04.buy_gurus.config.oauth;
+package com.team04.buy_gurus.oauth;
 
-import com.team04.buy_gurus.config.oauth.userinfo.GoogleOAuth2UserInfo;
-import com.team04.buy_gurus.config.oauth.userinfo.KakaoOAuth2UserInfo;
-import com.team04.buy_gurus.config.oauth.userinfo.NaverOAuth2UserInfo;
-import com.team04.buy_gurus.config.oauth.userinfo.OAuth2UserInfo;
+import com.team04.buy_gurus.oauth.userinfo.GoogleOAuth2UserInfo;
+import com.team04.buy_gurus.oauth.userinfo.KakaoOAuth2UserInfo;
+import com.team04.buy_gurus.oauth.userinfo.NaverOAuth2UserInfo;
+import com.team04.buy_gurus.oauth.userinfo.OAuth2UserInfo;
 import com.team04.buy_gurus.user.entity.Provider;
 import com.team04.buy_gurus.user.entity.Role;
 import com.team04.buy_gurus.user.entity.User;

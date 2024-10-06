@@ -1,15 +1,15 @@
 package com.team04.buy_gurus.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.team04.buy_gurus.config.jwt.filter.CustomJsonUsernamePasswordAuthenticationFilter;
-import com.team04.buy_gurus.config.jwt.filter.JwtAuthenticationFilter;
-import com.team04.buy_gurus.config.jwt.handler.LoginFailureHandler;
-import com.team04.buy_gurus.config.jwt.handler.LoginSuccessHandler;
-import com.team04.buy_gurus.config.jwt.service.JwtService;
-import com.team04.buy_gurus.config.jwt.service.LoginService;
-import com.team04.buy_gurus.config.oauth.service.CustomOAuth2UserService;
-import com.team04.buy_gurus.config.oauth.handler.OAuth2LoginFailureHandler;
-import com.team04.buy_gurus.config.oauth.handler.OAuth2LoginSuccessHandler;
+import com.team04.buy_gurus.jwt.filter.CustomJsonUsernamePasswordAuthenticationFilter;
+import com.team04.buy_gurus.jwt.filter.JwtAuthenticationFilter;
+import com.team04.buy_gurus.jwt.handler.LoginFailureHandler;
+import com.team04.buy_gurus.jwt.handler.LoginSuccessHandler;
+import com.team04.buy_gurus.jwt.service.JwtService;
+import com.team04.buy_gurus.jwt.service.LoginService;
+import com.team04.buy_gurus.oauth.service.CustomOAuth2UserService;
+import com.team04.buy_gurus.oauth.handler.OAuth2LoginFailureHandler;
+import com.team04.buy_gurus.oauth.handler.OAuth2LoginSuccessHandler;
 import com.team04.buy_gurus.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -20,17 +20,16 @@ import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer.FrameOptionsConfig;
 
 @RequiredArgsConstructor
 @Configuration
@@ -45,7 +44,6 @@ public class SecurityConfig {
     private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
     private final CustomOAuth2UserService customOAuth2UserService;
 
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -53,17 +51,20 @@ public class SecurityConfig {
                 .httpBasic(httpBasic -> httpBasic.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
-                .headers(headers -> headers.frameOptions().disable())
+                .headers(httpSecurityHeadersConfigurer -> httpSecurityHeadersConfigurer
+                        .frameOptions(FrameOptionsConfig::disable)
+                )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/", "/css/**", "/images/**", "/js/**", "/favicon.ico", "/h2-console/**").permitAll()
-                        .requestMatchers("/sign-up", "login").permitAll()
+                        .requestMatchers("/", "/css/**", "/images/**", "/js/**", "/favicon.ico", "/h2-console").permitAll()
+                        .requestMatchers("/signup", "/oauth2/authorization/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .successHandler(oAuth2LoginSuccessHandler)
                         .failureHandler(oAuth2LoginFailureHandler)
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
+                        .defaultSuccessUrl("http://localhost:5173/home", true)
                 )
                 .addFilterAfter(customJsonUsernamePasswordAuthenticationFilter(), LogoutFilter.class)
                 .addFilterBefore(jwtAuthenticationProcessingFilter(), CustomJsonUsernamePasswordAuthenticationFilter.class)

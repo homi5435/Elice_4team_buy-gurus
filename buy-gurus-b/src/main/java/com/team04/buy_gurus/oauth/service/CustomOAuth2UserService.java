@@ -1,9 +1,8 @@
-package com.team04.buy_gurus.config.oauth.service;
+package com.team04.buy_gurus.oauth.service;
 
-import com.team04.buy_gurus.config.oauth.CustomOAuth2User;
-import com.team04.buy_gurus.config.oauth.OAuthAttributes;
+import com.team04.buy_gurus.oauth.CustomOAuth2User;
+import com.team04.buy_gurus.oauth.OAuthAttributes;
 import com.team04.buy_gurus.user.entity.Provider;
-import com.team04.buy_gurus.user.entity.Role;
 import com.team04.buy_gurus.user.entity.User;
 import com.team04.buy_gurus.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.Map;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor

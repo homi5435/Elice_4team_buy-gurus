@@ -1,8 +1,9 @@
-package com.team04.buy_gurus.config.jwt.filter;
+package com.team04.buy_gurus.jwt.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -15,6 +16,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
+@Slf4j
 public class CustomJsonUsernamePasswordAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
     private static final String DEFAULT_LOGIN_REQUEST_URL = "/login";
@@ -28,12 +30,13 @@ public class CustomJsonUsernamePasswordAuthenticationFilter extends AbstractAuth
     private final ObjectMapper objectMapper;
 
     public CustomJsonUsernamePasswordAuthenticationFilter(ObjectMapper objectMapper) {
-        super(DEFAULT_LOGIN_PATH_REQUEST_MATCHER); // 위에서 설정한 "login" + POST로 온 요청을 처리하기 위해 설정
+        super(DEFAULT_LOGIN_PATH_REQUEST_MATCHER);
         this.objectMapper = objectMapper;
     }
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException, IOException {
+        log.info("CustomJsonUsernamePasswordAuthenticationFilter");
         if(request.getContentType() == null || !request.getContentType().equals(CONTENT_TYPE)  ) {
             throw new AuthenticationServiceException("Authentication Content-Type not supported: " + request.getContentType());
         }

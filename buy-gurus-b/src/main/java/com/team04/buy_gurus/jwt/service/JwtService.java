@@ -1,20 +1,21 @@
-package com.team04.buy_gurus.config.jwt.service;
+package com.team04.buy_gurus.jwt.service;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.team04.buy_gurus.config.jwt.JwtProperties;
+import com.team04.buy_gurus.jwt.JwtProperties;
 import com.team04.buy_gurus.user.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.Optional;
 
+@Slf4j
 @Service
 @Getter
 @RequiredArgsConstructor
@@ -52,9 +53,10 @@ public class JwtService {
         response.setHeader(jwtProperties.getAccessTokenHeader(), accessToken);
     }
 
-    public void sendAccessAndRefreshToken(HttpServletResponse response, String accessToken, String refreshToken) {
+    public void sendAccessAndRefreshToken(HttpServletResponse response,
+                                          String accessToken,
+                                          String refreshToken) {
         response.setStatus(HttpServletResponse.SC_OK);
-
         setAccessTokenHeader(response, accessToken);
         setRefreshTokenHeader(response, refreshToken);
     }
@@ -66,6 +68,7 @@ public class JwtService {
     }
 
     public Optional<String> extractRefreshToken(HttpServletRequest request) {
+        log.info("extractRefreshToken");
         return Optional.ofNullable(request.getHeader(jwtProperties.getRefreshTokenHeader()))
                 .filter(refreshToken -> refreshToken.startsWith(BEARER))
                 .map(refreshToken -> refreshToken.replace(BEARER, ""));
