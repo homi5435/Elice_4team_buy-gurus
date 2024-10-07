@@ -16,6 +16,10 @@ import java.util.List;
 public class OrderItemController {
     private final OrderItemService orderItemService;
 
+    @GetMapping("api/hello")
+    public String getHello(){
+        return "hello";
+    }
 
     // 장바구니 추가
     @PostMapping("api/orderitem/{product_id}")
@@ -47,7 +51,7 @@ public class OrderItemController {
 
     // 장바구니 수정
     @PatchMapping("api/orderitem/{id}")
-    public ResponseEntity<String> patchOrderItem(@PathVariable Long id, @RequestBody int amount){
+    public ResponseEntity<String> patchOrderItem(@PathVariable Long id, @RequestBody Long amount){
         orderItemService.patchOrderItem(id, amount);
         return ResponseEntity.ok("장바구니 수정 성공");
     }
