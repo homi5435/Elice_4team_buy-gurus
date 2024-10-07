@@ -64,7 +64,6 @@ public class SecurityConfig {
                         .successHandler(oAuth2LoginSuccessHandler)
                         .failureHandler(oAuth2LoginFailureHandler)
                         .userInfoEndpoint(userInfo -> userInfo.userService(customOAuth2UserService))
-                        .defaultSuccessUrl("http://localhost:5173/home", true)
                 )
                 .addFilterAfter(customJsonUsernamePasswordAuthenticationFilter(), LogoutFilter.class)
                 .addFilterBefore(jwtAuthenticationProcessingFilter(), CustomJsonUsernamePasswordAuthenticationFilter.class)
@@ -84,6 +83,7 @@ public class SecurityConfig {
         config.addAllowedOrigin("http://localhost:5173");
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
+        config.addExposedHeader("Authorization");
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);

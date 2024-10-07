@@ -46,8 +46,8 @@ public class User {
     @Column(name = "refresh_token", nullable = true)
     private String refreshToken;
 
-    public void updateRefreshToken(String updateRefreshToken) {
-        this.refreshToken = updateRefreshToken;
+    public void updateRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
     }
 
 }

@@ -2,14 +2,21 @@ package com.team04.buy_gurus.user.controller;
 
 import com.team04.buy_gurus.user.dto.SignupRequestDto;
 import com.team04.buy_gurus.jwt.service.LoginService;
+import com.team04.buy_gurus.user.dto.UserInfoResponseDto;
 import com.team04.buy_gurus.user.service.UserService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,18 +43,29 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
     }
-/*
-    @PostMapping("/login")
-    public ResponseEntity<> login(@RequestBody LoginRequestDto request) {
 
-        try {
-            loginService.loadUserByUsername(request.getEmail());
-            return ResponseEntity<>;
-        } catch (Exception e) {
-            return ResponseEntity<>;
+    // 회원 정보 불러오기
+    @GetMapping("/userMe")
+    public ResponseEntity<UserInfoResponseDto> myPage(HttpServletRequest request) {
+        String accessToken = request.getHeader("Authorization");
+
+        if (accessToken == null || !accessToken.startsWith("Bearer ")) {
+            // return ResponseEntity.status(HttpStatus.UNAUTHORIZED);
         }
 
-    }*/
+        accessToken = accessToken.substring(7);
 
+        try {
+
+            return ResponseEntity.ok(new UserInfoResponseDto());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new UserInfoResponseDto());
+        }
+    }
+
+    // 회원 정보 수정
+    // 판매자 등록
+    // 회원 탈퇴
 
 }

@@ -6,6 +6,7 @@ import com.team04.buy_gurus.user.entity.Provider;
 import com.team04.buy_gurus.user.entity.User;
 import com.team04.buy_gurus.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.util.Collections;
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequest, OAuth2User> {
@@ -29,6 +31,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
 
+        log.info("로드유저 메서드 동작");
         OAuth2UserService<OAuth2UserRequest, OAuth2User> delegate = new DefaultOAuth2UserService();
         OAuth2User oAuth2User = delegate.loadUser(userRequest);
 
@@ -68,9 +71,10 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
         User user = userRepository.findByProviderAndProviderId(provider,
                 attributes.getOauth2UserInfo().getId()).orElse(null);
 
-        if(user == null) {
+        if (user == null) {
             return saveUser(attributes, provider);
         }
+
         return user;
     }
 

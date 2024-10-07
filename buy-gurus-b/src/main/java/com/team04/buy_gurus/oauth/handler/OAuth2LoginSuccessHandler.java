@@ -8,18 +8,19 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     private final JwtService jwtService;
-    private final JwtProperties jwtProperties;
     private final UserRepository userRepository;
 
     @Override
@@ -28,10 +29,9 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                                         Authentication authentication) throws IOException, ServletException {
         try {
             CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
-
             loginSuccess(response, oAuth2User);
-
         } catch (Exception e) {
+            e.printStackTrace();
             throw e;
         }
 
@@ -40,10 +40,17 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     private void loginSuccess(HttpServletResponse response, CustomOAuth2User oAuth2User) throws IOException {
         String accessToken = jwtService.createAccessToken(oAuth2User.getEmail());
         String refreshToken = jwtService.createRefreshToken();
-        response.addHeader(jwtProperties.getAccessTokenHeader(), "Bearer " + accessToken);
-        response.addHeader(jwtProperties.getRefreshTokenHeader(), "Bearer " + refreshToken);
+        jwtService.setAccessTokenHeader(response, accessToken);
+        jwtService.addRefreshTokenToCookie(response, refreshToken);
 
         jwtService.sendAccessAndRefreshToken(response, accessToken, refreshToken);
         jwtService.updateRefreshToken(oAuth2User.getEmail(), refreshToken);
+
+        try {
+            String redirectUrl = "http://localhost:5173/home";
+            response.sendRedirect(redirectUrl);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

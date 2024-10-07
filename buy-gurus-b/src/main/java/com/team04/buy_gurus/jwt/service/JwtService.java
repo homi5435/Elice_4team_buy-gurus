@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.team04.buy_gurus.jwt.JwtProperties;
 import com.team04.buy_gurus.user.repository.UserRepository;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
@@ -87,7 +88,7 @@ public class JwtService {
     }
 
     public void setAccessTokenHeader(HttpServletResponse response, String accessToken) {
-        response.setHeader(jwtProperties.getAccessTokenHeader(), accessToken);
+        response.setHeader(jwtProperties.getAccessTokenHeader(), "Bearer " + accessToken);
     }
 
     public void setRefreshTokenHeader(HttpServletResponse response, String refreshToken) {
@@ -109,5 +110,13 @@ public class JwtService {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    public void addRefreshTokenToCookie(HttpServletResponse response, String refreshToken) {
+        Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
+        refreshTokenCookie.setHttpOnly(true);
+        refreshTokenCookie.setSecure(false);
+        refreshTokenCookie.setPath("/");
+        refreshTokenCookie.setMaxAge(7 * 24 * 60 * 60);
     }
 }
