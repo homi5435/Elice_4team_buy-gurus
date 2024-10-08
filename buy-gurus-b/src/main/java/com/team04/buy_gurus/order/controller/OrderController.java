@@ -1,6 +1,7 @@
 package com.team04.buy_gurus.order.controller;
 
 import com.team04.buy_gurus.order.domain.Order;
+import com.team04.buy_gurus.order.dto.OrderPageRequest;
 import com.team04.buy_gurus.order.dto.OrderRequest;
 import com.team04.buy_gurus.order.dto.OrderResponse;
 import com.team04.buy_gurus.order.dto.OrderUpdateRequest;
@@ -27,8 +28,8 @@ public class OrderController {
     }
 
     @GetMapping
-    public ResponseEntity<List<OrderResponse>> getAllOrder() {
-        List<Order> orderList = orderService.getOrders();
+    public ResponseEntity<List<OrderResponse>> getAllOrder(@Valid OrderPageRequest.Type type, OrderPageRequest.Pageable page) {
+        List<Order> orderList = orderService.getOrders(type, page);
         List<OrderResponse> orderResponseList = new ArrayList<>();
         for (Order order : orderList) {
             orderResponseList.add(new OrderResponse(order));
