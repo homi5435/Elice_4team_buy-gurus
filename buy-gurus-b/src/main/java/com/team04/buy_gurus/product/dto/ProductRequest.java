@@ -4,6 +4,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Getter;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @Getter
 public class ProductRequest {
@@ -20,7 +23,7 @@ public class ProductRequest {
     private Long quantity;
 
     @NotBlank(message = "이미지를 반드시 포함하여야 합니다.")
-    private String imageUrl;
+    private MultipartFile[] imageFiles;
 
     @NotBlank(message = "카테고리는 반드시 선택하여야 합니다.")
     private String category;
