@@ -29,9 +29,9 @@ public class Category {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Category parent;
 
-    //최상위 레벨값은 1입니다.
-    @Column(nullable = false)
-    @ColumnDefault("1")
-    private Long level;
+    public Category(final String name, final Category parent){
+        this.name = name;
+        this.parent = parent;
+    }
 
 }
