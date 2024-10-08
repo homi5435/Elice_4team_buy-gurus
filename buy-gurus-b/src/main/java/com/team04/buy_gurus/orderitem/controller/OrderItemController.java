@@ -1,7 +1,8 @@
 package com.team04.buy_gurus.orderitem.controller;
 
+import com.team04.buy_gurus.orderitem.domain.OrderItem;
 import com.team04.buy_gurus.orderitem.dto.OrderItemRequestDto;
-import com.team04.buy_gurus.orderitem.dto.OrderItemViewDto;
+import com.team04.buy_gurus.orderitem.dto.OrderItemResponseDto;
 import com.team04.buy_gurus.orderitem.service.OrderItemService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -11,54 +12,51 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/*
+React에서 Axios.get()은 RequestBody로 받을수 없어 토큰을 받기 전 PathVariable 활용
+*/
 @RestController
 @RequiredArgsConstructor
 public class OrderItemController {
     private final OrderItemService orderItemService;
 
-    @GetMapping("api/hello")
-    public String getHello(){
-        return "hello";
-    }
-
     // 장바구니 추가
-    @PostMapping("api/orderitem/{product_id}")
-    public ResponseEntity<String> addOrderItem(@Valid @RequestBody OrderItemRequestDto orderItemRequestDto, @PathVariable Long product_id){
-        orderItemService.addOrderItem(orderItemRequestDto, product_id);
+    @PostMapping("api/orderitem/{product_id}/{user_id}")
+    public ResponseEntity<String> addOrderItem(@Valid @RequestBody OrderItemRequestDto request, @PathVariable Long product_id,
+                                               @PathVariable Long user_id){
+        orderItemService.addOrderItem(request, product_id, user_id);
 
         return ResponseEntity.ok("장바구니 추가 성공");
     }
 
     // 장바구니 조회
-    @GetMapping("api/orderitem")
-    public ResponseEntity<String> readOrderItem(@RequestBody Long user_id, Model model){
-        List<OrderItemViewDto> orderItem = orderItemService.readOrderItem(user_id);
+    @GetMapping("api/orderitem/{user_id}")
+    public ResponseEntity<List<OrderItemResponseDto>> readOrderItem(@PathVariable Long user_id){
+        List<OrderItemResponseDto> response = orderItemService.readOrderItem(user_id);
 
+        /* 프론트에서 처리할 예정
         int totalAmount = 0;
         int totalPrice = 0;
 
-        for(OrderItemViewDto item: orderItem){
+        for(OrderItemResponseDto item: response){
             totalAmount += item.getAmount();
-            totalPrice += item.getAmount() * item.getPrice();
+            totalPrice += (int) (item.getAmount() * item.getPrice());
         }
-
-        model.addAttribute("orderItem", orderItem);
-        model.addAttribute("totalAmount", totalAmount);
-        model.addAttribute("totalPrice", totalPrice);
-
-        return ResponseEntity.ok("장바구니 조회 성공");
+        */
+        
+        return ResponseEntity.ok(response);
     }
 
     // 장바구니 수정
     @PatchMapping("api/orderitem/{id}")
-    public ResponseEntity<String> patchOrderItem(@PathVariable Long id, @RequestBody Long amount){
-        orderItemService.patchOrderItem(id, amount);
+    public ResponseEntity<String> patchOrderItem(@PathVariable Long id, @RequestBody OrderItemRequestDto request){
+        orderItemService.patchOrderItem(id, request.getAmount());
         return ResponseEntity.ok("장바구니 수정 성공");
     }
 
     // 장바구니 전체 삭제
-    @DeleteMapping("api/orderitem")
-    public ResponseEntity<String> deleteAllOrderItem(@RequestBody Long user_id){
+    @DeleteMapping("api/orderitem/{user_id}")
+    public ResponseEntity<String> deleteAllOrderItem(@PathVariable Long user_id){
         orderItemService.deleteAllOrderItem(user_id);
         return ResponseEntity.ok("장바구니 전체 삭제 성공");
     }

@@ -2,7 +2,7 @@ package com.team04.buy_gurus.orderitem.service;
 
 import com.team04.buy_gurus.orderitem.domain.OrderItem;
 import com.team04.buy_gurus.orderitem.dto.OrderItemRequestDto;
-import com.team04.buy_gurus.orderitem.dto.OrderItemViewDto;
+import com.team04.buy_gurus.orderitem.dto.OrderItemResponseDto;
 import com.team04.buy_gurus.orderitem.repository.OrderItemRepository;
 import com.team04.buy_gurus.product.domain.Product;
 import com.team04.buy_gurus.product.repository.ProductRepository;
@@ -10,8 +10,10 @@ import com.team04.buy_gurus.user.entity.User;
 import com.team04.buy_gurus.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.query.Order;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -23,8 +25,8 @@ public class OrderItemService {
 
     // 장바구니 추가
     @Transactional
-    public void addOrderItem(OrderItemRequestDto orderItemRequestDto, Long productId) {
-      User user = userRepository.findById(orderItemRequestDto.getUser_id())
+    public void addOrderItem(OrderItemRequestDto request, Long productId, Long user_id) {
+      User user = userRepository.findById(user_id)
                                             .orElseThrow(IllegalArgumentException::new);
 
       Product product = productRepository.findById(productId)
@@ -53,12 +55,19 @@ public class OrderItemService {
 
     // 장바구니 조회
     @Transactional
-    public List<OrderItemViewDto> readOrderItem(Long user_id) {
+    public List<OrderItemResponseDto> readOrderItem(Long user_id) {
         User user = userRepository.findById(user_id)
                 .orElseThrow(IllegalArgumentException::new);
 
-        List<OrderItemViewDto> readOrderItem = orderItemRepository.findByUser(user);
-        return readOrderItem;
+        List<OrderItem> readOrderItem = orderItemRepository.findByUser(user);
+
+        List<OrderItemResponseDto> response = new ArrayList<>();
+
+        for(OrderItem orderItem : readOrderItem){
+            response.add(new OrderItemResponseDto(orderItem));
+        }
+
+        return response;
     }
 
     // 장바구니 수정
@@ -73,10 +82,7 @@ public class OrderItemService {
     // 장바구니 전체 삭제
     @Transactional
     public void deleteAllOrderItem(Long user_id) {
-        User user = userRepository.findById(user_id)
-                .orElseThrow(IllegalArgumentException::new);
-
-        orderItemRepository.deleteAllByUser(user);
+        orderItemRepository.deleteAllByUser(user_id);
     }
 
     // 장바구니 일부 삭제
