@@ -30,15 +30,13 @@ public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         String refreshToken = jwtService.createRefreshToken();
 
         response.setStatus(HttpServletResponse.SC_OK);
-        jwtService.setAccessTokenHeader(response, accessToken);
+        jwtService.addAccessTokenToCookie(response, accessToken);
 
         userRepository.findByEmail(email)
                 .ifPresent(user -> {
                     user.updateRefreshToken(refreshToken);
                     userRepository.saveAndFlush(user);
                 });
-
-        jwtService.addRefreshTokenToCookie(response, refreshToken);
     }
 
         private String extractUsername(Authentication authentication) {

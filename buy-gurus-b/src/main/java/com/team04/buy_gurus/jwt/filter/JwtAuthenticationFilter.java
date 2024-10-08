@@ -43,45 +43,50 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         log.info("JwtAuthenticationFilter 동작");
-        String refreshToken = jwtService.extractRefreshToken(request)
+        String accessToken = jwtService.extractAccessToken(request)
                 .filter(jwtService::isTokenValid)
                 .orElse(null);
 
-        if (refreshToken != null) {
-            checkRefreshTokenAndReIssueAccessToken(response, refreshToken);
-            return;
+        if (accessToken != null) {
+            // accessToken = accessToken.substring(7);
+            checkAccessTokenAndAuthentication(request, response, filterChain, accessToken);
         }
 
-        if (refreshToken == null) {
-            checkAccessTokenAndAuthentication(request, response, filterChain);
+        if (accessToken == null) {
+            jwtService.extractAccessToken(request)
+                    .ifPresent(access -> jwtService.extractEmail(access)
+                            .ifPresent(email -> userRepository.findByEmail(email)
+                                    .ifPresent(user -> {
+                                        checkRefreshTokenAndReIssueAccessToken(response, user);
+                                        return;
+                                    })));
+
+            filterChain.doFilter(request, response);
         }
     }
 
-    public void checkRefreshTokenAndReIssueAccessToken(HttpServletResponse response, String refreshToken) {
-        userRepository.findByRefreshToken(refreshToken)
-                .ifPresent(user -> {
-                    String reIssuedRefreshToken = reIssueRefreshToken(user);
-                    jwtService.sendAccessAndRefreshToken(response, jwtService.createAccessToken(user.getEmail()),
-                            reIssuedRefreshToken);
-                });
+    public void checkRefreshTokenAndReIssueAccessToken(HttpServletResponse response, User user) {
+
+        reIssueRefreshToken(user);
+        response.setStatus(HttpServletResponse.SC_OK);
+        String accessToken = jwtService.createAccessToken(user.getEmail());
+        jwtService.addAccessTokenToCookie(response, accessToken);
     }
 
-    private String reIssueRefreshToken(User user) {
+    private void reIssueRefreshToken(User user) {
         String refreshToken = jwtService.createRefreshToken();
         user.updateRefreshToken(refreshToken);
         userRepository.saveAndFlush(user);
-        return refreshToken;
     }
 
     public void checkAccessTokenAndAuthentication(HttpServletRequest request,
                                                   HttpServletResponse response,
-                                                  FilterChain filterChain) throws ServletException, IOException {
+                                                  FilterChain filterChain,
+                                                  String accessToken) throws ServletException, IOException {
 
-        jwtService.extractAccessToken(request)
-                .filter(jwtService::isTokenValid)
-                .ifPresent(accessToken -> jwtService.extractEmail(accessToken)
-                        .ifPresent(email -> userRepository.findByEmail(email)
-                                .ifPresent(this::saveAuthentication)));
+        jwtService.extractEmail(accessToken)
+                .ifPresent(email -> userRepository.findByEmail(email)
+                        .ifPresent(this::saveAuthentication));
 
         filterChain.doFilter(request, response);
     }

@@ -12,7 +12,7 @@ public class JwtProperties {
 
     private String secretKey = "yourverylongsecretkeyshouldbe64bytesormore1234567890";
     private Long accessTokenExpiration = 3600L;
-    private Long refreshTokenExpiration = 1209600L;
+    private Long refreshTokenExpiration = 604800L;
     private String accessTokenHeader = "Authorization";
     private String refreshTokenHeader = "Authorization-refresh";
 

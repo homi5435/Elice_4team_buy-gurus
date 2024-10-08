@@ -28,7 +28,7 @@ public class UserController {
     private final LoginService loginService;
 
     @PostMapping("/signup")
-    public ResponseEntity<Map<String, String>> signupRequest(@RequestBody SignupRequestDto request) {
+    public ResponseEntity<Map<String, String>> createUser(@RequestBody SignupRequestDto request) {
         try {
             userService.signup(request);
 
@@ -46,22 +46,8 @@ public class UserController {
 
     // 회원 정보 불러오기
     @GetMapping("/userMe")
-    public ResponseEntity<UserInfoResponseDto> myPage(HttpServletRequest request) {
-        String accessToken = request.getHeader("Authorization");
+    public ResponseEntity<> readUser(HttpServletRequest request) {
 
-        if (accessToken == null || !accessToken.startsWith("Bearer ")) {
-            // return ResponseEntity.status(HttpStatus.UNAUTHORIZED);
-        }
-
-        accessToken = accessToken.substring(7);
-
-        try {
-
-            return ResponseEntity.ok(new UserInfoResponseDto());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new UserInfoResponseDto());
-        }
     }
 
     // 회원 정보 수정

@@ -49,30 +49,16 @@ public class JwtService {
                 .sign(Algorithm.HMAC512(jwtProperties.getSecretKey()));
     }
 
-    public void sendAccessToken(HttpServletResponse response, String accessToken) {
-        response.setStatus(HttpServletResponse.SC_OK);
-        response.setHeader(jwtProperties.getAccessTokenHeader(), accessToken);
-    }
-
-    public void sendAccessAndRefreshToken(HttpServletResponse response,
-                                          String accessToken,
-                                          String refreshToken) {
-        response.setStatus(HttpServletResponse.SC_OK);
-        setAccessTokenHeader(response, accessToken);
-        setRefreshTokenHeader(response, refreshToken);
-    }
-
     public Optional<String> extractAccessToken(HttpServletRequest request) {
-        return Optional.ofNullable(request.getHeader(jwtProperties.getAccessTokenHeader()))
-                .filter(refreshToken -> refreshToken.startsWith(BEARER))
-                .map(refreshToken -> refreshToken.replace(BEARER, ""));
-    }
-
-    public Optional<String> extractRefreshToken(HttpServletRequest request) {
-        log.info("extractRefreshToken");
-        return Optional.ofNullable(request.getHeader(jwtProperties.getRefreshTokenHeader()))
-                .filter(refreshToken -> refreshToken.startsWith(BEARER))
-                .map(refreshToken -> refreshToken.replace(BEARER, ""));
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("accessToken")) {
+                    return Optional.of(cookie.getValue());
+                }
+            }
+        }
+        return Optional.empty();
     }
 
     public Optional<String> extractEmail(String accessToken) {
@@ -85,14 +71,6 @@ public class JwtService {
         } catch (Exception e) {
             return Optional.empty();
         }
-    }
-
-    public void setAccessTokenHeader(HttpServletResponse response, String accessToken) {
-        response.setHeader(jwtProperties.getAccessTokenHeader(), "Bearer " + accessToken);
-    }
-
-    public void setRefreshTokenHeader(HttpServletResponse response, String refreshToken) {
-        response.setHeader(jwtProperties.getRefreshTokenHeader(), refreshToken);
     }
 
     public void updateRefreshToken(String email, String refreshToken) {
@@ -112,11 +90,13 @@ public class JwtService {
         }
     }
 
-    public void addRefreshTokenToCookie(HttpServletResponse response, String refreshToken) {
-        Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
-        refreshTokenCookie.setHttpOnly(true);
-        refreshTokenCookie.setSecure(false);
-        refreshTokenCookie.setPath("/");
-        refreshTokenCookie.setMaxAge(7 * 24 * 60 * 60);
+    public void addAccessTokenToCookie(HttpServletResponse response, String accessToken) {
+        Cookie accessTokenCookie = new Cookie("accessToken", accessToken);
+        log.info("crate cookie: " + accessToken);
+        accessTokenCookie.setHttpOnly(true);
+        accessTokenCookie.setSecure(false);
+        accessTokenCookie.setPath("/");
+        accessTokenCookie.setMaxAge(2 * 24 * 60 * 60);
+        response.addCookie(accessTokenCookie);
     }
 }
