@@ -29,7 +29,7 @@ public class JwtService {
     private static final String ACCESS_TOKEN_SUBJECT = "AccessToken";
     private static final String REFRESH_TOKEN_SUBJECT = "RefreshToken";
     private static final String EMAIL_CLAIM = "email";
-    private static final String USER_ID_CLAIM = "user_id";
+    // private static final String USER_ID_CLAIM = "user_id";
     private static final String BEARER = "Bearer ";
 
     private final UserRepository userRepository;
@@ -40,7 +40,6 @@ public class JwtService {
                 .withSubject(ACCESS_TOKEN_SUBJECT)
                 .withExpiresAt(new Date(now.getTime() + jwtProperties.getAccessTokenExpiration()))
                 .withClaim(EMAIL_CLAIM, email)
-                .withClaim(USER_ID_CLAIM, email)
                 .withClaim()
                 .sign(Algorithm.HMAC512(jwtProperties.getSecretKey()));
     }
