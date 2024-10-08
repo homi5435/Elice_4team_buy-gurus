@@ -4,5 +4,9 @@ import com.team04.buy_gurus.order.domain.Order;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.Repository;
 
+import java.util.Optional;
+
 public interface OrderRepository extends JpaRepository<Order, Long> {
+    //리뷰 주문 정보 조회
+    Optional<Order> findByUserIdAndProductIdAndStatus(Long userId, Long productId, String status);
 }
