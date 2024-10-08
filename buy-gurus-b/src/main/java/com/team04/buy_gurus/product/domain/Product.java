@@ -45,10 +45,6 @@ public class Product {
     @Column(nullable = false)
     private Long quantity;
 
-    //이미지 Url
-    @Column(nullable = false)
-    private String imageUrl;
-
     @Column(nullable = false)
     private String category;
 

@@ -32,9 +32,8 @@ public class ProductController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ProductResponse> getProduct(@PathVariable Long id){
-        Optional<ProductResponse> response = productService.getProduct(id);
-        return response.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        ProductResponse response = productService.getProduct(id);
+        return ResponseEntity.ok(response);
     }
 
     @PatchMapping("/{id}")
