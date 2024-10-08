@@ -49,10 +49,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (accessToken != null) {
             // accessToken = accessToken.substring(7);
+            log.info("엑세스 토큰 검증 통과");
             checkAccessTokenAndAuthentication(request, response, filterChain, accessToken);
         }
 
         if (accessToken == null) {
+            log.info("엑세스 토큰 검증 실패");
             jwtService.extractAccessToken(request)
                     .ifPresent(access -> jwtService.extractEmail(access)
                             .ifPresent(email -> userRepository.findByEmail(email)
@@ -106,7 +108,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         Authentication authentication =
                 new UsernamePasswordAuthenticationToken(userDetailsUser, null,
                         authoritiesMapper.mapAuthorities(userDetailsUser.getAuthorities()));
-
+        log.info("saveAuthentication 동작");
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 }

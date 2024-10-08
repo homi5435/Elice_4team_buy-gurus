@@ -2,6 +2,7 @@ package com.team04.buy_gurus.jwt.service;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.team04.buy_gurus.jwt.JwtProperties;
 import com.team04.buy_gurus.user.repository.UserRepository;
 import jakarta.servlet.http.Cookie;
@@ -28,6 +29,7 @@ public class JwtService {
     private static final String ACCESS_TOKEN_SUBJECT = "AccessToken";
     private static final String REFRESH_TOKEN_SUBJECT = "RefreshToken";
     private static final String EMAIL_CLAIM = "email";
+    private static final String USER_ID_CLAIM = "user_id";
     private static final String BEARER = "Bearer ";
 
     private final UserRepository userRepository;
@@ -38,6 +40,8 @@ public class JwtService {
                 .withSubject(ACCESS_TOKEN_SUBJECT)
                 .withExpiresAt(new Date(now.getTime() + jwtProperties.getAccessTokenExpiration()))
                 .withClaim(EMAIL_CLAIM, email)
+                .withClaim(USER_ID_CLAIM, email)
+                .withClaim()
                 .sign(Algorithm.HMAC512(jwtProperties.getSecretKey()));
     }
 
@@ -76,7 +80,10 @@ public class JwtService {
     public void updateRefreshToken(String email, String refreshToken) {
         userRepository.findByEmail(email)
                 .ifPresentOrElse(
-                        user -> user.updateRefreshToken(refreshToken),
+                        user -> {
+                            user.updateRefreshToken(refreshToken);
+                            userRepository.saveAndFlush(user);
+                        },
                         () -> new Exception("일치하는 회원이 없습니다.")
                 );
     }
@@ -85,9 +92,12 @@ public class JwtService {
         try {
             JWT.require(Algorithm.HMAC512(jwtProperties.getSecretKey())).build().verify(token);
             return true;
+        } catch (JWTVerificationException e) {
+            log.error("토큰 검증 실패: " + e.getMessage(), e);
         } catch (Exception e) {
-            return false;
+            log.error("예상치 못한 오류: " + e.getMessage(), e);
         }
+        return false;
     }
 
     public void addAccessTokenToCookie(HttpServletResponse response, String accessToken) {

@@ -1,18 +1,14 @@
 package com.team04.buy_gurus.user.dto;
 
-import com.team04.buy_gurus.user.entity.Role;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class UserInfoResponseDto {
-
-    // private String imageUrl;
+public class UserEditResponseDto {
 
     private String nickname;
 
     private String email;
-
-    private Role role;
 }

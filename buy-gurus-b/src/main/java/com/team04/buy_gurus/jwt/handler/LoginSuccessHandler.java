@@ -25,6 +25,7 @@ public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
                                         HttpServletResponse response,
                                         Authentication authentication) {
 
+        log.info("일반 로그인 성공 핸들러 동작");
         String email = extractUsername(authentication);
         String accessToken = jwtService.createAccessToken(email);
         String refreshToken = jwtService.createRefreshToken();
