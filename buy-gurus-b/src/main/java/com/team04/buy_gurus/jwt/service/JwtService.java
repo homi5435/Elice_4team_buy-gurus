@@ -40,7 +40,6 @@ public class JwtService {
                 .withSubject(ACCESS_TOKEN_SUBJECT)
                 .withExpiresAt(new Date(now.getTime() + jwtProperties.getAccessTokenExpiration()))
                 .withClaim(EMAIL_CLAIM, email)
-                .withClaim()
                 .sign(Algorithm.HMAC512(jwtProperties.getSecretKey()));
     }
 
