@@ -1,13 +1,11 @@
 package com.team04.buy_gurus.order.controller;
 
 import com.team04.buy_gurus.order.domain.Order;
-import com.team04.buy_gurus.order.dto.OrderPageRequest;
-import com.team04.buy_gurus.order.dto.OrderRequest;
-import com.team04.buy_gurus.order.dto.OrderResponse;
-import com.team04.buy_gurus.order.dto.OrderUpdateRequest;
+import com.team04.buy_gurus.order.dto.*;
 import com.team04.buy_gurus.order.service.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,13 +26,9 @@ public class OrderController {
     }
 
     @GetMapping
-    public ResponseEntity<List<OrderResponse>> getAllOrder(@Valid OrderPageRequest.Type type, OrderPageRequest.Pageable page) {
-        List<Order> orderList = orderService.getOrders(type, page);
-        List<OrderResponse> orderResponseList = new ArrayList<>();
-        for (Order order : orderList) {
-            orderResponseList.add(new OrderResponse(order));
-        }
-        return ResponseEntity.ok(orderResponseList);
+    public ResponseEntity<OrderListResponse> getAllOrder(@Valid OrderPageRequest.Type type, OrderPageRequest.Pageable page) {
+        Page<Order> paged = orderService.getOrders(type, page);
+        return ResponseEntity.ok(new OrderListResponse(paged));
     }
 
     @GetMapping("/{id}")

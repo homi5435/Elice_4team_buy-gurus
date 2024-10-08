@@ -61,7 +61,7 @@ public class OrderService {
         return orderRepository.findById(orderId).orElse(null);
     }
 
-    public List<Order> getOrders(OrderPageRequest.Type typeReq, OrderPageRequest.Pageable pageReq) {
+    public Page<Order> getOrders(OrderPageRequest.Type typeReq, OrderPageRequest.Pageable pageReq) {
         Sort sort = Sort.by(Sort.Direction.DESC, "id");
         Pageable pageable = PageRequest.of(pageReq.getPage() - 1, pageReq.getSize(), sort);
         Page<Order> paged;
@@ -70,7 +70,7 @@ public class OrderService {
         } else {
             paged = orderRepository.findAllByIsDeletedFalse(pageable);
         }
-        return paged.getContent();
+        return paged;
     }
 
     @Transactional
