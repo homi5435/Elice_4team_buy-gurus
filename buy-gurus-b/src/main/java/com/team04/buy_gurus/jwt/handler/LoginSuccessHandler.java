@@ -27,11 +27,17 @@ public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
         log.info("일반 로그인 성공 핸들러 동작");
         String email = extractUsername(authentication);
-        String accessToken = jwtService.createAccessToken(email);
+        Long userId = userRepository.findByEmail(email)
+                .map(user -> user.getId())
+                .orElseThrow(() -> {
+                    throw new IllegalArgumentException("회원을 찾을 수 없습니다.");
+                });
+        String accessToken = jwtService.createAccessToken(userId);
         String refreshToken = jwtService.createRefreshToken();
 
         response.setStatus(HttpServletResponse.SC_OK);
         jwtService.addAccessTokenToCookie(response, accessToken);
+        jwtService.addRefreshTokenToCookie(response, refreshToken);
 
         userRepository.findByEmail(email)
                 .ifPresent(user -> {

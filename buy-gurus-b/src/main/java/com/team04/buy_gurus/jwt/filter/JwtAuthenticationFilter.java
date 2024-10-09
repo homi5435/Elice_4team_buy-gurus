@@ -55,13 +55,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (accessToken == null) {
             log.info("엑세스 토큰 검증 실패");
-            jwtService.extractAccessToken(request)
-                    .ifPresent(access -> jwtService.extractEmail(access)
-                            .ifPresent(email -> userRepository.findByEmail(email)
-                                    .ifPresent(user -> {
-                                        checkRefreshTokenAndReIssueAccessToken(response, user);
-                                        return;
-                                    })));
+            String refreshToken = jwtService.extractRefreshToken(request)
+                    .filter(jwtService::isTokenValid)
+                    .orElse(null);
+
+            if (refreshToken != null) {
+                User user = userRepository.findByRefreshToken(refreshToken)
+                        .orElseThrow(() -> {
+                            throw new IllegalArgumentException("회원을 찾을 수 없습니다.");
+                        });
+                checkRefreshTokenAndReIssueAccessToken(response, user);
+            }
+
+            if (refreshToken == null) {
+
+            }
 
             filterChain.doFilter(request, response);
         }
@@ -71,7 +79,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         reIssueRefreshToken(user);
         response.setStatus(HttpServletResponse.SC_OK);
-        String accessToken = jwtService.createAccessToken(user.getEmail());
+        String accessToken = jwtService.createAccessToken(user.getId());
         jwtService.addAccessTokenToCookie(response, accessToken);
     }
 
@@ -86,8 +94,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                                   FilterChain filterChain,
                                                   String accessToken) throws ServletException, IOException {
 
-        jwtService.extractEmail(accessToken)
-                .ifPresent(email -> userRepository.findByEmail(email)
+        jwtService.extractUserId(accessToken)
+                .ifPresent(userId -> userRepository.findById(userId)
                         .ifPresent(this::saveAuthentication));
 
         filterChain.doFilter(request, response);

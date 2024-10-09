@@ -38,12 +38,13 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     }
 
     private void loginSuccess(HttpServletResponse response, CustomOAuth2User oAuth2User) throws IOException {
-        String accessToken = jwtService.createAccessToken(oAuth2User.getEmail());
+        String accessToken = jwtService.createAccessToken(oAuth2User.getUserId());
         String refreshToken = jwtService.createRefreshToken();
 
         response.setStatus(HttpServletResponse.SC_OK);
         jwtService.addAccessTokenToCookie(response, accessToken);
-        jwtService.updateRefreshToken(oAuth2User.getEmail(), refreshToken);
+        jwtService.addRefreshTokenToCookie(response, refreshToken);
+        jwtService.updateRefreshToken(oAuth2User.getUserId(), refreshToken);
 
         try {
             String redirectUrl = "http://localhost:5173/home";

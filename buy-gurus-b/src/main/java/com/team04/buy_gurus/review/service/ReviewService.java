@@ -24,9 +24,9 @@ public class ReviewService {
 
     //리뷰 생성
     public ReviewResponse createReview(ReviewRequest request){
-        Order order = orderRepository.findByUserIdAndProductIdAndStatus(
-                request.getUserId(), request.getProductId(), "SHIPPED")
-                .orElseThrow(() -> new RuntimeException("해당 상품을 구매하고 배송이 완료된 소비자만 리뷰를 등록할 수 있습니다."));
+        //Order order = orderRepository.findByUserIdAndProductIdAndStatus(
+        //        request.getUserId(), request.getProductId(), "SHIPPED")
+        //        .orElseThrow(() -> new RuntimeException("해당 상품을 구매하고 배송이 완료된 소비자만 리뷰를 등록할 수 있습니다."));
 
         Review review = Review.builder()
                 .rating(request.getRating())

@@ -33,7 +33,6 @@ public class UserController {
             userService.signup(request);
             return ResponseEntity.status(HttpStatus.CREATED).build();
         } catch (Exception e) {
-            // 추후 닉네임, 이메일 중복 예외처리 필요
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
@@ -70,9 +69,8 @@ public class UserController {
         } catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         } catch (Exception e) {
-            // 추후 닉네임, 이메일 중복 예외처리 필요
+            log.error("Error updating user info: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
-            //.body(new UserEditResponseDto(e.getMessage()))
         }
     }
 

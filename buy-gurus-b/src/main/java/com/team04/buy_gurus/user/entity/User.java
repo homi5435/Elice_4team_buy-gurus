@@ -50,8 +50,11 @@ public class User {
         this.refreshToken = refreshToken;
     }
 
-    public void updateNicknameAndEmail(String nickname, String email){
+    public void updateNickname(String nickname){
         this.nickname = nickname;
+    }
+
+    public void updateEmail(String email){
         this.email = email;
     }
 }
