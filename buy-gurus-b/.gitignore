@@ -37,4 +37,4 @@ out/
 .vscode/
 
 # 모든 yml 파일 무시
-*.yml
+s3bucket.yml
