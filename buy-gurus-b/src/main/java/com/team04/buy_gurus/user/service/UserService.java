@@ -57,7 +57,14 @@ public class UserService {
                 .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
     }
 
-    public UserEditResponseDto editUserInfo(Authentication authentication, UserEditRequestDto request){
+    public UserEditResponseDto editUserInfo(Authentication authentication, UserEditRequestDto request) throws Exception {
+
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new Exception("이미 존재하는 이메일입니다.");
+        }
+        if (userRepository.findByNickname(request.getNickname()).isPresent()) {
+            throw new Exception("이미 존재하는 닉네임입니다.");
+        }
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         String email = userDetails.getUsername();
