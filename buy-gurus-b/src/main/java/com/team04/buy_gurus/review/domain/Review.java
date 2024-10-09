@@ -35,7 +35,7 @@ public class Review {
     @Column(name = "user_id")
     private Long userId; // 사용자 ID
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", insertable = false, updatable = false)
-    private User user; // 사용자 정보
+//    @ManyToOne
+//    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+//    private User user; // 사용자 정보
 }
