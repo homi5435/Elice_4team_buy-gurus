@@ -1,5 +1,6 @@
 package com.team04.buy_gurus.review.domain;
 
+import com.team04.buy_gurus.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 

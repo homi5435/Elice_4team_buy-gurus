@@ -27,3 +27,10 @@ spring:
   config:
     import:
       - s3bucket.yml
+      - security.yml
+
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG
