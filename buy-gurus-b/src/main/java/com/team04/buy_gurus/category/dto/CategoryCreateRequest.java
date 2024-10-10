@@ -1,4 +1,4 @@
-package com.team04.buy_gurus.category.application.dto;
+package com.team04.buy_gurus.category.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

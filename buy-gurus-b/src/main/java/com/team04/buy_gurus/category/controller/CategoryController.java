@@ -1,12 +1,14 @@
-package com.team04.buy_gurus.category.persistence.controller;
+package com.team04.buy_gurus.category.controller;
 
-import com.team04.buy_gurus.category.application.dto.CategoryCreateRequest;
-import com.team04.buy_gurus.category.application.dto.response.Response;
-import com.team04.buy_gurus.category.application.service.CategoryService;
+import com.team04.buy_gurus.category.dto.CategoryCreateRequest;
+import com.team04.buy_gurus.category.dto.CategoryDto;
+import com.team04.buy_gurus.category.dto.response.Response;
+import com.team04.buy_gurus.category.service.CategoryService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api")
@@ -20,9 +22,12 @@ public class CategoryController {
     }
 
 //페이지네이션이 꼭 필요할까?
+   /* @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/category")
+    public Response findAllCategory(){ return Response.success(categoryService.findAllCategory());}*/
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/category")
-    public Response findAllCategory(){ return Response.success(categoryService.findAllCategory());}
+    public List<CategoryDto> findAllCategory(){ return categoryService.findAllCategory();}
 
     @DeleteMapping("/category/{id}")
     @ResponseStatus(HttpStatus.OK)
@@ -31,9 +36,9 @@ public class CategoryController {
         return Response.success();
     }
 //최초의 대분류 카테고리를 생성하는 로직
-    @PostMapping("/category/")
-    public Response createFirstCategory(@Valid @RequestBody String name){
-        categoryService.createCategory(name);
+    @PostMapping("/FirstCategory")
+    public Response createFirstCategory(@Valid @RequestBody final CategoryCreateRequest request){
+        categoryService.createCategory(request.getName());
         return Response.success();
     }
 

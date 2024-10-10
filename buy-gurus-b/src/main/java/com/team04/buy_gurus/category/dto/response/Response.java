@@ -1,4 +1,4 @@
-package com.team04.buy_gurus.category.application.dto.response;
+package com.team04.buy_gurus.category.dto.response;
 
 
 import com.fasterxml.jackson.annotation.JsonInclude;

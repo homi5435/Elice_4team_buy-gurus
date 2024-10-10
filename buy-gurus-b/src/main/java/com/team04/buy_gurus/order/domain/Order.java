@@ -57,8 +57,8 @@ public class Order {
     @JoinColumn(name = "orders_id")
     private List<OrderInfo> orderInfoList;
 
-    @OneToOne
-    private Refund refund;
+    //@OneToOne
+    //private Refund refund;
 
     @AllArgsConstructor
     @Getter

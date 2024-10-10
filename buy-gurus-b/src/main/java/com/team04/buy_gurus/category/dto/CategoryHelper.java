@@ -1,6 +1,6 @@
-package com.team04.buy_gurus.category.application.dto;
+package com.team04.buy_gurus.category.dto;
 
-import com.team04.buy_gurus.category.application.exception.CannotConvertHelperException;
+import com.team04.buy_gurus.category.dto.exception.CannotConvertHelperException;
 
 import java.util.*;
 import java.util.function.Function;

@@ -27,19 +27,10 @@ spring:
   config:
     import:
       - s3bucket.yml
+      - security.yml
 
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            client-id: 90079091124-rmkh10vsnapnj9kp7abrao82mqiuvkoq.apps.googleusercontent.com
-            client-secret: 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
-            scope: profile, email
-
-    jwt:
-      secretKey: "yourverylongsecretkeyshouldbe64bytesormore1234567890"
-      accessTokenExpiration: 3600
-      refreshTokenExpiration: 604800
-      accessTokenHeader: "Authorization"
-      refreshTokenHeader: "Authorization-refresh"
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG

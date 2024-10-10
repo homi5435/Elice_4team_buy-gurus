@@ -1,6 +1,6 @@
-package com.team04.buy_gurus.category.application.dto;
+package com.team04.buy_gurus.category.dto;
 
-import com.team04.buy_gurus.category.persistence.entity.Category;
+import com.team04.buy_gurus.category.domain.Category;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

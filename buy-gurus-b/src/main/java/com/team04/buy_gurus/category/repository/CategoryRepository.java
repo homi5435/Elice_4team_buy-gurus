@@ -1,6 +1,6 @@
-package com.team04.buy_gurus.category.persistence.repository;
+package com.team04.buy_gurus.category.repository;
 
-import com.team04.buy_gurus.category.persistence.entity.Category;
+import com.team04.buy_gurus.category.domain.Category;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 

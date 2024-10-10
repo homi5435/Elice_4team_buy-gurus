@@ -1,12 +1,11 @@
 package com.team04.buy_gurus.user.controller;
 
-import com.team04.buy_gurus.user.dto.SignupRequestDto;
-import com.team04.buy_gurus.user.dto.UserEditRequestDto;
-import com.team04.buy_gurus.user.dto.UserEditResponseDto;
-import com.team04.buy_gurus.user.dto.UserInfoResponseDto;
+import com.team04.buy_gurus.jwt.service.JwtService;
+import com.team04.buy_gurus.user.dto.*;
 import com.team04.buy_gurus.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -25,25 +24,20 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
+//@RequestMapping("api/user")
 public class UserController {
 
     private final UserService userService;
+    private final JwtService jwtService;
 
     @PostMapping("/signup")
-    public ResponseEntity<Map<String, String>> createUser(@RequestBody SignupRequestDto request) {
+    public ResponseEntity<Void> createUser(@RequestBody @Valid SignupRequestDto request) {
 
         try {
             userService.signup(request);
-
-            Map<String, String> response = new HashMap<>();
-            response.put("message", "회원가입 성공");
-
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+            return ResponseEntity.status(HttpStatus.CREATED).build();
         } catch (Exception e) {
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("message", "회원가입 실패: " + e.getMessage());
-
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
     }
 
@@ -65,7 +59,7 @@ public class UserController {
     }
 
     @PatchMapping("/userMe")
-    public ResponseEntity<UserEditResponseDto> updateUser(@RequestBody UserEditRequestDto request) {
+    public ResponseEntity<UserEditResponseDto> updateUser(@RequestBody @Valid UserEditRequestDto request) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -78,6 +72,9 @@ public class UserController {
             return ResponseEntity.ok(response);
         } catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (Exception e) {
+            log.error("Error updating user info: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
     }
 
@@ -101,6 +98,15 @@ public class UserController {
         }
 
 
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletResponse response) {
+
+        jwtService.removeAccessTokenToCookie(response);
+        jwtService.removeRefreshTokenToCookie(response);
+
+        return ResponseEntity.ok().build();
     }
 
 }

@@ -57,14 +57,19 @@ public class UserService {
                 .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
     }
 
-    public UserEditResponseDto editUserInfo(Authentication authentication, UserEditRequestDto request){
+    public UserEditResponseDto editUserInfo(Authentication authentication, UserEditRequestDto request) throws Exception {
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         String email = userDetails.getUsername();
 
         return userRepository.findByEmail(email)
                 .map(user -> {
-                    user.updateNicknameAndEmail(request.getNickname(), request.getEmail());
+                    if (userRepository.findByNickname(request.getNickname()).isEmpty()) {
+                        user.updateNickname(request.getNickname());
+                    }
+                    if (userRepository.findByEmail(request.getEmail()).isEmpty()){
+                        user.updateEmail(request.getEmail());
+                    }
                     userRepository.save(user);
                     return new UserEditResponseDto(request.getNickname(), request.getEmail());
                 })
@@ -78,7 +83,9 @@ public class UserService {
 
         userRepository.findByEmail(email)
                 .ifPresentOrElse(user -> userRepository.delete(user),
-                        () -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
+                        () -> {
+                            throw new IllegalArgumentException("회원을 찾을 수 없습니다.");
+                        });
     }
 
     public User findByEmail(String email) {

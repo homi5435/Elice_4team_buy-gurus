@@ -1,12 +1,11 @@
-package com.team04.buy_gurus.category.application.service;
+package com.team04.buy_gurus.category.service;
 
-import com.team04.buy_gurus.category.application.dto.CategoryCreateRequest;
-import com.team04.buy_gurus.category.application.dto.CategoryDto;
-import com.team04.buy_gurus.category.application.dto.exception.CategoryNotFoundException;
-import com.team04.buy_gurus.category.persistence.entity.Category;
-import com.team04.buy_gurus.category.persistence.repository.CategoryRepository;
+import com.team04.buy_gurus.category.dto.CategoryCreateRequest;
+import com.team04.buy_gurus.category.dto.CategoryDto;
+import com.team04.buy_gurus.category.dto.exception.CategoryNotFoundException;
+import com.team04.buy_gurus.category.domain.Category;
+import com.team04.buy_gurus.category.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.annotations.ColumnTransformer;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

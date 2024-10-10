@@ -1,10 +1,9 @@
-package com.team04.buy_gurus.category.persistence.entity;
+package com.team04.buy_gurus.category.domain;
 
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -12,7 +11,7 @@ import org.hibernate.annotations.OnDeleteAction;
 @RequiredArgsConstructor
 @Getter
 @Setter
-@Table(name = "categories")
+@Table(name = "category")
 public class Category {
 
     @Id
