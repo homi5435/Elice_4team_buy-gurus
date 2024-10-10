@@ -67,9 +67,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 checkRefreshTokenAndReIssueAccessToken(response, user);
             }
 
-            if (refreshToken == null) {
-
-            }
+            // 로그인 화면으로 리다이렉트
 
             filterChain.doFilter(request, response);
         }
