@@ -1,5 +1,6 @@
 package com.team04.buy_gurus.product.service;
 
+import com.team04.buy_gurus.product.aop.ProductNotFoundException;
 import com.team04.buy_gurus.product.domain.Product;
 import com.team04.buy_gurus.product.domain.ProductImage;
 import com.team04.buy_gurus.product.dto.ProductRequest;
@@ -71,7 +72,7 @@ public class ProductService {
 
     public ProductResponse getProduct(Long id){
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("상품을 찾을 수 없습니다."));
+                .orElseThrow(() -> new ProductNotFoundException("상품을 찾을 수 없습니다."));
 
         List<ProductImage> images = productImageRepository.findByProductId(product.getId());
         return mapToResponseDto(product, images);
@@ -79,7 +80,7 @@ public class ProductService {
 
     public ProductResponse updateProduct(Long id, ProductRequest request){
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("상품을 찾을 수 없습니다."));
+                .orElseThrow(() -> new ProductNotFoundException("상품을 찾을 수 없습니다."));
 
         product.setName(request.getName());
         product.setPrice(request.getPrice());
@@ -112,7 +113,7 @@ public class ProductService {
 
     public void deleteProduct(Long id){
         Product product = productRepository.findById(id)
-                .orElseThrow(()->new RuntimeException("삭제할 상품이 존재하지 않습니다."));
+                .orElseThrow(()->new ProductNotFoundException("삭제할 상품이 존재하지 않습니다."));
         product.setDeleted(true);
         productRepository.save(product);
     }
