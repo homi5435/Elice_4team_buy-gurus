@@ -1,9 +1,11 @@
 package com.team04.buy_gurus.user.controller;
 
+import com.team04.buy_gurus.jwt.service.JwtService;
 import com.team04.buy_gurus.user.dto.*;
 import com.team04.buy_gurus.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -22,12 +24,14 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
+//@RequestMapping("api/user")
 public class UserController {
 
     private final UserService userService;
+    private final JwtService jwtService;
 
     @PostMapping("/signup")
-    public ResponseEntity<Void> createUser(@RequestBody SignupRequestDto request) {
+    public ResponseEntity<Void> createUser(@RequestBody @Valid SignupRequestDto request) {
 
         try {
             userService.signup(request);
@@ -55,7 +59,7 @@ public class UserController {
     }
 
     @PatchMapping("/userMe")
-    public ResponseEntity<UserEditResponseDto> updateUser(@RequestBody UserEditRequestDto request) {
+    public ResponseEntity<UserEditResponseDto> updateUser(@RequestBody @Valid UserEditRequestDto request) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -94,6 +98,15 @@ public class UserController {
         }
 
 
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletResponse response) {
+
+        jwtService.removeAccessTokenToCookie(response);
+        jwtService.removeRefreshTokenToCookie(response);
+
+        return ResponseEntity.ok().build();
     }
 
 }
