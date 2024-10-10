@@ -25,8 +25,8 @@ public class OrderItemService {
 
     // 장바구니 추가
     @Transactional
-    public void addOrderItem(OrderItemRequestDto request, Long productId, Long user_id) {
-      User user = userRepository.findById(user_id)
+    public void addOrderItem(OrderItemRequestDto request, Long productId, Long userId) {
+      User user = userRepository.findById(userId)
                                             .orElseThrow(IllegalArgumentException::new);
 
       Product product = productRepository.findById(productId)
@@ -55,8 +55,8 @@ public class OrderItemService {
 
     // 장바구니 조회
     @Transactional
-    public List<OrderItemResponseDto> readOrderItem(Long user_id) {
-        User user = userRepository.findById(user_id)
+    public List<OrderItemResponseDto> readOrderItem(Long userId) {
+        User user = userRepository.findById(userId)
                 .orElseThrow(IllegalArgumentException::new);
 
         List<OrderItem> readOrderItem = orderItemRepository.findByUser(user);
@@ -81,8 +81,8 @@ public class OrderItemService {
 
     // 장바구니 전체 삭제
     @Transactional
-    public void deleteAllOrderItem(Long user_id) {
-        orderItemRepository.deleteAllByUser(user_id);
+    public void deleteAllOrderItem(Long userId) {
+        orderItemRepository.deleteAllByUser(userId);
     }
 
     // 장바구니 일부 삭제
