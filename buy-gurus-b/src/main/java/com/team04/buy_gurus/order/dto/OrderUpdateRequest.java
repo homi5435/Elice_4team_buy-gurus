@@ -14,17 +14,17 @@ public class OrderUpdateRequest {
         @NotBlank(message = "수취자 이름은 공백이 될 수 없습니다.")
         private String name;
 
-        @Pattern(regexp = "^(010)-?([1-9]{1}[0-9]{3})-?([0-9]{4})$", message = "전화번호는 010-XXXX-XXXX 또는 하이픈이 빠진 형태입니다.")
+        @Pattern(regexp = "^(010)-?([0-9]{4})-?([0-9]{4})$", message = "전화번호는 010-XXXX-XXXX 또는 하이픈이 빠진 형태입니다.")
         private String phoneNum;
     }
 
     @Getter
-    public static class InvoiceNumber {
+    public static class Invoice {
         @NotBlank(message = "운송 회사는 공백이 될 수 없습니다.")
         private String shippingCompany;
 
         @NotBlank(message = "송장번호는 공백이 될 수 없습니다.")
-        private String invoiceNumber;
+        private String invoiceNum;
     }
 
     @Getter

@@ -9,9 +9,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/order")
 @RequiredArgsConstructor
@@ -38,7 +35,7 @@ public class OrderController {
     }
 
     @PatchMapping("/{id}/invoice")
-    public ResponseEntity<?> updateInvoiceNumber(@PathVariable("id") Long id, @Valid @RequestBody OrderUpdateRequest.InvoiceNumber request) {
+    public ResponseEntity<?> updateInvoiceNumber(@PathVariable("id") Long id, @Valid @RequestBody OrderUpdateRequest.Invoice request) {
         orderService.updateInvoiceNumber(id, request);
         return ResponseEntity.ok().build();
     }

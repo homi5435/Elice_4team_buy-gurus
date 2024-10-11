@@ -13,7 +13,7 @@ public class OrderResponse {
     private Long orderId;
     private String createdAt;
     private String status;
-    private String invoiceNum;
+    private ShippingInvoice invoice;
     private int shippingFee;
     private List<OrderInfoResponse> orderInfoList;
     private ShippingAddressResponse shippingAddress;
@@ -22,12 +22,24 @@ public class OrderResponse {
         this.orderId = order.getId();
         this.createdAt = order.getCreatedAt().toString();
         this.status = order.getStatus().getStatus();
-        this.invoiceNum = order.getInvoiceNum() == null ? "" : order.getInvoiceNum();
+        this.invoice = new ShippingInvoice(order);
+//        this.invoiceNum = order.getInvoiceNum() == null ? "" : order.getInvoiceNum();
         this.shippingFee = order.getShippingFee();
         this.orderInfoList = order.getOrderInfoList().stream()
                 .map(OrderInfoResponse::new)
                 .collect(Collectors.toList());
         this.shippingAddress = new ShippingAddressResponse(order);
+    }
+
+    @Getter
+    private static class ShippingInvoice {
+        private final String shippingCompany;
+        private final String invoiceNum;
+
+        public ShippingInvoice(Order order) {
+            this.shippingCompany = order.getShippingCompany();
+            this.invoiceNum= order.getInvoiceNum();
+        }
     }
 
     @Getter

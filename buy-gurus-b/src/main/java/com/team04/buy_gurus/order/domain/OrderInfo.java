@@ -1,6 +1,7 @@
 package com.team04.buy_gurus.order.domain;
 
 import com.team04.buy_gurus.order.dto.OrderRequest;
+import com.team04.buy_gurus.product.domain.Product;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -28,10 +29,12 @@ public class OrderInfo {
     private String productName;
     private String productImageUrl;
 
-    // 상품 정보
+    // 상품 id
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id")
+    private Product product;
 
 
-    //
     public OrderInfo(int price, String productName, String imageUrl) {
         this.price = price;
         this.productName = productName;

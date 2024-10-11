@@ -2,6 +2,7 @@ package com.team04.buy_gurus.order.domain;
 
 import com.team04.buy_gurus.address.domain.AddressInfo;
 import com.team04.buy_gurus.order.dto.OrderUpdateRequest;
+import com.team04.buy_gurus.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
@@ -42,23 +43,32 @@ public class Order {
     private Status status = Status.PROCESSING;
 
     private String invoiceNum;
+    private String shippingCompany;
 
     @ColumnDefault("0")
     private int shippingFee;
 
+    // 유저 id
+
     // 주문자 정보
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private User user;
     private String shippingAddress;
     private String customerName;
     private String customerPhoneNum;
 
     // 판매자 ID
 
+
+    // 판매자 정보
+    private String sellerName;
+    private String sellerPhoneNum;
+    private String seller_company;
+
     @OneToMany
     @JoinColumn(name = "orders_id")
     private List<OrderInfo> orderInfoList;
-
-    //@OneToOne
-    //private Refund refund;
 
     @AllArgsConstructor
     @Getter
@@ -72,8 +82,9 @@ public class Order {
         private final String status;
     }
 
-    public void setInvoiceNumber(String invoiceNumber) {
-        this.invoiceNum = invoiceNumber;
+    public void setInvoice(OrderUpdateRequest.Invoice request) {
+        this.invoiceNum = request.getInvoiceNum();
+        this.shippingCompany = request.getShippingCompany();
         this.setStatus(Status.SHIPPING.getStatus());
     }
 

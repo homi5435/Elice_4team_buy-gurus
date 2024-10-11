@@ -38,7 +38,7 @@ public class AddressInfoController {
         return ResponseEntity.ok(addressInfo);
     }
 
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<?> updateAddress(@PathVariable Long id, @Valid @RequestBody AddressInfoRequest addressInfoRequest) {
         addressInfoService.update(id, addressInfoRequest);
         return ResponseEntity.ok().build();
