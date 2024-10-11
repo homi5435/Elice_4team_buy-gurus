@@ -1,4 +1,4 @@
-package com.team04.buy_gurus.utils.s3_bucket;
+package com.team04.buy_gurus.config;
 
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
