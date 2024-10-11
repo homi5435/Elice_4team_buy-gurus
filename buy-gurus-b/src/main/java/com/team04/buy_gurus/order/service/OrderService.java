@@ -74,11 +74,11 @@ public class OrderService {
     }
 
     @Transactional
-    public void updateInvoiceNumber(Long id, OrderUpdateRequest.InvoiceNumber request) {
+    public void updateInvoiceNumber(Long id, OrderUpdateRequest.Invoice request) {
         Order order = orderRepository.findById(id).orElseThrow(() -> new RuntimeException("Order not found"));
         if (order != null) {
-            order.setInvoiceNumber(request.getInvoiceNumber());
-            order.setStatus(Order.Status.SHIPPED.getStatus());
+            order.setInvoice(request);
+            order.setStatus(Order.Status.SHIPPING.getStatus());
         }
     }
 

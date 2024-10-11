@@ -10,6 +10,7 @@ import java.util.Optional;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
     //리뷰 주문 정보 조회
-    Optional<Order> findByUserIdAndStatus(Long userId, String status);
+//    Optional<Order> findByUserIdAndProductIdAndStatus(Long userId, Long productId, String status);
+
     Page<Order> findAllByIsDeletedFalse(Pageable pageable);
 }

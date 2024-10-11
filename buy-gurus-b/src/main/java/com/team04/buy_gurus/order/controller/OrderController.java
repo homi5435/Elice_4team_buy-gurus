@@ -3,6 +3,7 @@ package com.team04.buy_gurus.order.controller;
 import com.team04.buy_gurus.order.domain.Order;
 import com.team04.buy_gurus.order.dto.*;
 import com.team04.buy_gurus.order.service.OrderService;
+import com.team04.buy_gurus.utils.redis.RedisService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -17,11 +18,15 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OrderController {
     private final OrderService orderService;
+    private final RedisService redisService;
 
     // 주문 완료 시 저장
     @PostMapping
     public ResponseEntity<?> saveOrder(@Valid @RequestBody OrderRequest orderRequest) {
         orderService.save(orderRequest);
+        redisService.save("test", orderRequest.toString());
+        System.out.println(redisService.get("test"));
+        redisService.saveTTL("test/ttl", orderRequest, 10, "SEC");
         return ResponseEntity.ok().build();
     }
 
@@ -38,7 +43,7 @@ public class OrderController {
     }
 
     @PatchMapping("/{id}/invoice")
-    public ResponseEntity<?> updateInvoiceNumber(@PathVariable("id") Long id, @Valid @RequestBody OrderUpdateRequest.InvoiceNumber request) {
+    public ResponseEntity<?> updateInvoiceNumber(@PathVariable("id") Long id, @Valid @RequestBody OrderUpdateRequest.Invoice request) {
         orderService.updateInvoiceNumber(id, request);
         return ResponseEntity.ok().build();
     }
