@@ -1,5 +1,6 @@
 package com.team04.buy_gurus.jwt.service;
 
+import com.team04.buy_gurus.exception.ex_user.UserNotFoundException;
 import com.team04.buy_gurus.user.entity.User;
 import com.team04.buy_gurus.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,10 +16,10 @@ public class LoginService implements UserDetailsService {
     private final UserRepository userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String email) {
 
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("해당 이메일이 존재하지 않습니다."));
+                .orElseThrow(UserNotFoundException::new);
 
         return org.springframework.security.core.userdetails.User.builder()
                 .username(user.getEmail())

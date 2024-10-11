@@ -14,7 +14,7 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/public")
+@RequestMapping("/api/auth")
 public class EmailController {
 
     private final EmailService emailService;

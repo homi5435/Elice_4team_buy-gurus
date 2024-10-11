@@ -92,7 +92,7 @@ public class ReviewService {
                 .isDeleted(review.getIsDeleted())
                 .productId(review.getProductId())
                 .userId(review.getUserId())
-                .userNickname(review.getUser() != null ? review.getUser().getNickname() : null)
+                //.userNickname(review.getUser() != null ? review.getUser().getNickname() : null)
                 .build();
     }
 }

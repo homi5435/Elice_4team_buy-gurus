@@ -1,5 +1,6 @@
 package com.team04.buy_gurus.jwt.filter;
 
+import com.team04.buy_gurus.exception.ex_user.UserNotFoundException;
 import com.team04.buy_gurus.jwt.service.JwtService;
 import com.team04.buy_gurus.user.entity.User;
 import com.team04.buy_gurus.user.repository.UserRepository;
@@ -25,6 +26,7 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final String NO_CHECK_URL1 = "/login";
+    private static final String REDIRECT_URL = "http://localhost:5173/login";
 
     private final JwtService jwtService;
     private final UserRepository userRepository;
@@ -62,12 +64,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (refreshToken != null) {
                 User user = userRepository.findByRefreshToken(refreshToken)
                         .orElseThrow(() -> {
-                            throw new IllegalArgumentException("회원을 찾을 수 없습니다.");
+                            throw new UserNotFoundException();
                         });
                 checkRefreshTokenAndReIssueAccessToken(response, user);
             }
 
-            // 로그인 화면으로 리다이렉트
+            if (refreshToken == null) {
+                response.sendRedirect(REDIRECT_URL);
+            }
 
             filterChain.doFilter(request, response);
         }
@@ -93,8 +97,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                                   String accessToken) throws ServletException, IOException {
 
         jwtService.extractUserId(accessToken)
-                .ifPresent(userId -> userRepository.findById(userId)
-                        .ifPresent(this::saveAuthentication));
+                .flatMap(userRepository::findById)
+                .ifPresent(this::saveAuthentication);
 
         filterChain.doFilter(request, response);
     }

@@ -18,6 +18,4 @@ public class SignupRequestDto {
     // @Pattern()
     @NotBlank(message = "비밀번호를 입력해주세요.")
     private String password;
-
-    // 인증번호
 }
