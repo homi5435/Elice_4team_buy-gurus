@@ -31,25 +31,15 @@ public class OrderItemController {
 
     // 장바구니 조회
     @GetMapping("api/orderitem/{userId}")
-    public ResponseEntity<List<OrderItemResponseDto>> readOrderItem(@PathVariable Long user_id){
-        List<OrderItemResponseDto> response = orderItemService.readOrderItem(user_id);
-
-        /* 프론트에서 처리할 예정
-        int totalAmount = 0;
-        int totalPrice = 0;
-
-        for(OrderItemResponseDto item: response){
-            totalAmount += item.getAmount();
-            totalPrice += (int) (item.getAmount() * item.getPrice());
-        }
-        */
+    public ResponseEntity<List<OrderItemResponseDto>> readOrderItem(@PathVariable Long userId){
+        List<OrderItemResponseDto> response = orderItemService.readOrderItem(userId);
         
         return ResponseEntity.ok(response);
     }
 
     // 장바구니 수정
     @PatchMapping("api/orderitem/{orderItemId}")
-    public ResponseEntity<String> patchOrderItem(@PathVariable Long id, @RequestBody OrderItemRequestDto request){
+    public ResponseEntity<String> patchOrderItem(@PathVariable(value = "orderItemId") Long id, @RequestBody OrderItemRequestDto request){
         orderItemService.patchOrderItem(id, request.getAmount());
         return ResponseEntity.ok("장바구니 수정 성공");
     }
@@ -63,7 +53,7 @@ public class OrderItemController {
 
     // 장바구니 일부 삭제
     @DeleteMapping("api/orderitem/{orderItemId}")
-    public ResponseEntity<String> deleteOrderItem(@PathVariable Long id){
+    public ResponseEntity<String> deleteOrderItem(@PathVariable(value = "orderItemId") Long id){
         orderItemService.deleteOrderItem(id);
         return ResponseEntity.ok("장바구니 일부 삭제 성공");
     }
