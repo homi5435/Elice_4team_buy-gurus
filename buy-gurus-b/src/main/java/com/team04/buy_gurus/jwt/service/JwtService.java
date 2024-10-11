@@ -3,6 +3,7 @@ package com.team04.buy_gurus.jwt.service;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.team04.buy_gurus.exception.ex_user.UserNotFoundException;
 import com.team04.buy_gurus.jwt.JwtProperties;
 import com.team04.buy_gurus.user.repository.UserRepository;
 import jakarta.servlet.http.Cookie;
@@ -27,7 +28,9 @@ public class JwtService {
     private final JwtProperties jwtProperties;
 
     private static final String ACCESS_TOKEN_SUBJECT = "AccessToken";
+    private static final String ACCESS_TOKEN_COOKIE = "accessToken";
     private static final String REFRESH_TOKEN_SUBJECT = "RefreshToken";
+    private static final String REFRESH_TOKEN_COOKIE = "refreshToken";
     private static final String USER_ID_CLAIM = "user_id";
     private static final String BEARER = "Bearer ";
 
@@ -54,7 +57,7 @@ public class JwtService {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if (cookie.getName().equals("accessToken")) {
+                if (cookie.getName().equals(ACCESS_TOKEN_COOKIE)) {
                     return Optional.of(cookie.getValue());
                 }
             }
@@ -66,7 +69,7 @@ public class JwtService {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if (cookie.getName().equals("refreshToken")) {
+                if (cookie.getName().equals(REFRESH_TOKEN_COOKIE)) {
                     return Optional.of(cookie.getValue());
                 }
             }
@@ -94,7 +97,7 @@ public class JwtService {
                             userRepository.saveAndFlush(user);
                         },
                         () -> {
-                            throw new IllegalArgumentException("일치하는 회원이 없습니다.");
+                            throw new UserNotFoundException();
                         }
                 );
     }
@@ -112,7 +115,7 @@ public class JwtService {
     }
 
     public void addAccessTokenToCookie(HttpServletResponse response, String accessToken) {
-        Cookie accessTokenCookie = new Cookie("accessToken", accessToken);
+        Cookie accessTokenCookie = new Cookie(ACCESS_TOKEN_COOKIE, accessToken);
         accessTokenCookie.setHttpOnly(true);
         accessTokenCookie.setSecure(false);
         accessTokenCookie.setPath("/");
@@ -121,7 +124,7 @@ public class JwtService {
     }
 
     public void addRefreshTokenToCookie(HttpServletResponse response, String refreshToken) {
-        Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
+        Cookie refreshTokenCookie = new Cookie(REFRESH_TOKEN_COOKIE, refreshToken);
         refreshTokenCookie.setHttpOnly(true);
         refreshTokenCookie.setSecure(false);
         refreshTokenCookie.setPath("/");
@@ -130,7 +133,7 @@ public class JwtService {
     }
 
     public void removeAccessTokenToCookie(HttpServletResponse response) {
-        Cookie accessTokenCookie = new Cookie("accessToken", null);
+        Cookie accessTokenCookie = new Cookie(ACCESS_TOKEN_COOKIE, null);
         accessTokenCookie.setHttpOnly(true);
         accessTokenCookie.setSecure(false);
         accessTokenCookie.setPath("/");
@@ -139,7 +142,7 @@ public class JwtService {
     }
 
     public void removeRefreshTokenToCookie(HttpServletResponse response) {
-        Cookie refreshTokenCookie = new Cookie("refreshToken", null);
+        Cookie refreshTokenCookie = new Cookie(REFRESH_TOKEN_COOKIE, null);
         refreshTokenCookie.setHttpOnly(true);
         refreshTokenCookie.setSecure(false);
         refreshTokenCookie.setPath("/");

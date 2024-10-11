@@ -1,5 +1,8 @@
 package com.team04.buy_gurus.user.service;
 
+import com.team04.buy_gurus.exception.ex_user.DuplicateEmailException;
+import com.team04.buy_gurus.exception.ex_user.DuplicateNicknameException;
+import com.team04.buy_gurus.exception.ex_user.UserNotFoundException;
 import com.team04.buy_gurus.user.dto.SignupRequestDto;
 import com.team04.buy_gurus.user.dto.UserEditRequestDto;
 import com.team04.buy_gurus.user.dto.UserEditResponseDto;
@@ -25,28 +28,25 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional
-    public Long signup(SignupRequestDto request) throws Exception{
+    public void signup(SignupRequestDto request) {
 
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new Exception("이미 존재하는 이메일입니다.");
+            throw new DuplicateEmailException();
         }
         if (userRepository.findByNickname(request.getNickname()).isPresent()) {
-            throw new Exception("이미 존재하는 닉네임입니다.");
+            throw new DuplicateNicknameException();
         }
 
-        return userRepository.save(User.builder()
+        userRepository.save(User.builder()
                 .nickname(request.getNickname())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.USER)
                 .provider(Provider.NONE)
-                .build()).getId();
+                .build());
     }
 
-    public UserInfoResponseDto loadUserInfo(Authentication authentication) {
-
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String email = userDetails.getUsername();
+    public UserInfoResponseDto loadUserInfo(String email) {
 
         return userRepository.findByEmail(email)
                 .map(user -> new UserInfoResponseDto(
@@ -54,13 +54,10 @@ public class UserService {
                         user.getNickname(),
                         user.getEmail(),
                         user.getRole()))
-                .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
+                .orElseThrow(UserNotFoundException::new);
     }
 
-    public UserEditResponseDto editUserInfo(Authentication authentication, UserEditRequestDto request) throws Exception {
-
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String email = userDetails.getUsername();
+    public UserEditResponseDto editUserInfo(String email, UserEditRequestDto request) {
 
         return userRepository.findByEmail(email)
                 .map(user -> {
@@ -73,23 +70,20 @@ public class UserService {
                     userRepository.save(user);
                     return new UserEditResponseDto(request.getNickname(), request.getEmail());
                 })
-                .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
+                .orElseThrow(UserNotFoundException::new);
     }
 
-    public void withdrawal(Authentication authentication) {
-
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String email = userDetails.getUsername();
+    public void withdrawal(String email) {
 
         userRepository.findByEmail(email)
-                .ifPresentOrElse(user -> userRepository.delete(user),
+                .ifPresentOrElse(userRepository::delete,
                         () -> {
-                            throw new IllegalArgumentException("회원을 찾을 수 없습니다.");
+                            throw new UserNotFoundException();
                         });
     }
 
     public User findByEmail(String email) {
         return userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("Unexpected user"));
+                .orElseThrow(UserNotFoundException::new);
     }
 }

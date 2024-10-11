@@ -8,6 +8,8 @@ import lombok.Getter;
 @AllArgsConstructor
 public class UserEditResponseDto {
 
+    // private String imageUrl;
+
     private String nickname;
 
     private String email;
