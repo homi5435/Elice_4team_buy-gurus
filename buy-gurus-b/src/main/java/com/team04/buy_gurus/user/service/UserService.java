@@ -1,8 +1,9 @@
 package com.team04.buy_gurus.user.service;
 
-import com.team04.buy_gurus.exception.ex_user.DuplicateEmailException;
-import com.team04.buy_gurus.exception.ex_user.DuplicateNicknameException;
-import com.team04.buy_gurus.exception.ex_user.UserNotFoundException;
+import com.team04.buy_gurus.exception.ex_user.ex.DuplicateEmailException;
+import com.team04.buy_gurus.exception.ex_user.ex.DuplicateNicknameException;
+import com.team04.buy_gurus.exception.ex_user.ex.UnverifiedEmailException;
+import com.team04.buy_gurus.exception.ex_user.ex.UserNotFoundException;
 import com.team04.buy_gurus.user.dto.SignupRequestDto;
 import com.team04.buy_gurus.user.dto.UserEditRequestDto;
 import com.team04.buy_gurus.user.dto.UserEditResponseDto;
@@ -14,8 +15,8 @@ import com.team04.buy_gurus.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -26,9 +27,19 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final StringRedisTemplate redisTemplate;
 
     @Transactional
     public void signup(SignupRequestDto request) {
+
+        ValueOperations<String, String> valueOps = redisTemplate.opsForValue();
+        String isVerified = valueOps.get(request.getEmail() + ":verified");
+
+        if (isVerified.equals("true")) {
+            redisTemplate.delete(request.getEmail() + ":verified");
+        } else {
+            throw new UnverifiedEmailException();
+        }
 
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new DuplicateEmailException();
@@ -58,6 +69,15 @@ public class UserService {
     }
 
     public UserEditResponseDto editUserInfo(String email, UserEditRequestDto request) {
+
+        ValueOperations<String, String> valueOps = redisTemplate.opsForValue();
+        String isVerified = valueOps.get(request.getEmail() + ":verified");
+
+        if (isVerified.equals("true")) {
+            redisTemplate.delete(request.getEmail() + ":verified");
+        } else {
+            throw new UnverifiedEmailException();
+        }
 
         return userRepository.findByEmail(email)
                 .map(user -> {

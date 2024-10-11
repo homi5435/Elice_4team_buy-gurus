@@ -45,6 +45,7 @@ public class UserController {
             return ResponseEntity.ok(response);
     }
 
+    // Void로 바꿔야 하나?
     @PatchMapping("/userMe")
     public ResponseEntity<UserEditResponseDto> updateUser(@AuthenticationPrincipal UserDetails userDetails, @RequestBody @Valid UserEditRequestDto request) {
 

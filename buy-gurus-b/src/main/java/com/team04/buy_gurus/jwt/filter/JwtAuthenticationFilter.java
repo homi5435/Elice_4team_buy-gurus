@@ -1,6 +1,6 @@
 package com.team04.buy_gurus.jwt.filter;
 
-import com.team04.buy_gurus.exception.ex_user.UserNotFoundException;
+import com.team04.buy_gurus.exception.ex_user.ex.UserNotFoundException;
 import com.team04.buy_gurus.jwt.service.JwtService;
 import com.team04.buy_gurus.user.entity.User;
 import com.team04.buy_gurus.user.repository.UserRepository;
@@ -86,6 +86,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private void reIssueRefreshToken(User user) {
+
         String refreshToken = jwtService.createRefreshToken();
         user.updateRefreshToken(refreshToken);
         userRepository.saveAndFlush(user);
@@ -104,7 +105,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     public void saveAuthentication(User user) {
+
         String password = user.getPassword();
+
         if (password == null) {
             password = PasswordUtil.generateRandomPassword();
         }
@@ -118,7 +121,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         Authentication authentication =
                 new UsernamePasswordAuthenticationToken(userDetailsUser, null,
                         authoritiesMapper.mapAuthorities(userDetailsUser.getAuthorities()));
-        log.info("saveAuthentication 동작");
+
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 }

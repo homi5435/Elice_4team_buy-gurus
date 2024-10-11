@@ -1,4 +1,4 @@
-package com.team04.buy_gurus.exception.ex_user;
+package com.team04.buy_gurus.exception.ex_user.ex;
 
 public class UserNotFoundException extends RuntimeException {
 
