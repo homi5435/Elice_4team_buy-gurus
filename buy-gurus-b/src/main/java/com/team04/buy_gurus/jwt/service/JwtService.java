@@ -3,7 +3,7 @@ package com.team04.buy_gurus.jwt.service;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
-import com.team04.buy_gurus.exception.ex_user.UserNotFoundException;
+import com.team04.buy_gurus.exception.ex_user.ex.UserNotFoundException;
 import com.team04.buy_gurus.jwt.JwtProperties;
 import com.team04.buy_gurus.user.repository.UserRepository;
 import jakarta.servlet.http.Cookie;
