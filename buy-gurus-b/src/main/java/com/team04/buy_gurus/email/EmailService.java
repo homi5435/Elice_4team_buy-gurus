@@ -28,6 +28,8 @@ public class EmailService {
         ValueOperations<String, String> valueOps = redisTemplate.opsForValue();
         valueOps.set(email, verificationCode, 5, TimeUnit.MINUTES);
 
+        log.info(valueOps.get(email));
+
         sendEmail(email, verificationCode);
     }
 
@@ -57,6 +59,7 @@ public class EmailService {
         }
 
         valueOps.set(email + ":verified", "true", 10, TimeUnit.MINUTES);
+        log.info(valueOps.get(email + ":verified"));
         redisTemplate.delete(email);
     }
 

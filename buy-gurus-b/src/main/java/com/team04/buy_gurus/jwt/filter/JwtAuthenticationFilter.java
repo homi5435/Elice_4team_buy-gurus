@@ -1,5 +1,6 @@
 package com.team04.buy_gurus.jwt.filter;
 
+import com.team04.buy_gurus.config.PermitAllUrlConfig;
 import com.team04.buy_gurus.exception.ex_user.ex.UserNotFoundException;
 import com.team04.buy_gurus.jwt.service.JwtService;
 import com.team04.buy_gurus.user.entity.User;
@@ -20,16 +21,17 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private static final String NO_CHECK_URL1 = "/login";
     private static final String REDIRECT_URL = "http://localhost:5173/login";
 
     private final JwtService jwtService;
     private final UserRepository userRepository;
+    private final PermitAllUrlConfig permitAllUrlConfig;
 
     private GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
 
@@ -38,7 +40,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        if (request.getRequestURI().equals(NO_CHECK_URL1)) {
+        if (filterSkip(request)){
             filterChain.doFilter(request, response);
             log.info("JwtAuthenticationFilter 생략");
             return;
@@ -63,9 +65,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             if (refreshToken != null) {
                 User user = userRepository.findByRefreshToken(refreshToken)
-                        .orElseThrow(() -> {
-                            throw new UserNotFoundException();
-                        });
+                        .orElseThrow(UserNotFoundException::new);
                 checkRefreshTokenAndReIssueAccessToken(response, user);
             }
 
@@ -75,6 +75,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             filterChain.doFilter(request, response);
         }
+    }
+
+    private boolean filterSkip(HttpServletRequest request) {
+
+        List<String> permiitAllUrls = permitAllUrlConfig.getPermitAllUrls();
+
+        for (String url : permiitAllUrls) {
+            if(request.getRequestURI().startsWith(url.replace("**", ""))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public void checkRefreshTokenAndReIssueAccessToken(HttpServletResponse response, User user) {

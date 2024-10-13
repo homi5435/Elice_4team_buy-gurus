@@ -4,10 +4,7 @@ import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,8 +17,6 @@ public class EmailController {
 
     private final EmailService emailService;
 
-    private Map<String, String> verificationCodes = new HashMap<>();
-
     @PostMapping("/send-verification-email")
     public ResponseEntity<Void> sendVerificationEmail(@RequestParam("email") String email) throws MessagingException {
 
@@ -30,9 +25,9 @@ public class EmailController {
     }
 
     @PostMapping("/verify-code")
-    public ResponseEntity<Void> verifyCode(@RequestParam("email") String email, @RequestParam("code") String code) {
+    public ResponseEntity<Void> verifyCode(@RequestBody VerifyRequestDto request) {
         log.info("인증번호 검증");
-        emailService.verifyCode(email, code);
+        emailService.verifyCode(request.getEmail(), request.getCode());
         return ResponseEntity.ok().build();
     }
 }
