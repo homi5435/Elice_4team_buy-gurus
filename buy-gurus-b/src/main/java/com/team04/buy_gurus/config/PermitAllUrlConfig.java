@@ -18,7 +18,8 @@ public class PermitAllUrlConfig {
                 "/login",
                 "/signup",
                 "/oauth2/authorization/**",
-                "/api/auth/**"
+                "/api/auth/**",
+                "/reset-password"
         );
     }
 }
