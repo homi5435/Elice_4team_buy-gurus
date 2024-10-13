@@ -53,9 +53,21 @@ public class UserController {
             return ResponseEntity.ok(response);
     }
 
-    // 판매자 등록
+    @PatchMapping("seller-registration")
+    public ResponseEntity<Void> updateRole(@AuthenticationPrincipal UserDetails userDetails, @RequestBody @Valid SellerRegistrationRequestDto request) {
 
-    // 회원 탈퇴
+        userService.sellerRegistration(userDetails.getUsername(), request);
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/reset-password")
+    public ResponseEntity<Void> updatePassword(@RequestBody @Valid ResetPasswordRequestDto request) {
+
+        userService.resetPassword(request);
+        return ResponseEntity.ok().build();
+    }
+
+    // 소프트 딜리트로 바꿔야 하나?
     @DeleteMapping("/userMe")
     public ResponseEntity<Void> deleteUser(@AuthenticationPrincipal UserDetails userDetails) {
 

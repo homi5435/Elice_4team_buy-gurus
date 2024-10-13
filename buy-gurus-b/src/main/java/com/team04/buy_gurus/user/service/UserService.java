@@ -4,10 +4,7 @@ import com.team04.buy_gurus.exception.ex_user.ex.DuplicateEmailException;
 import com.team04.buy_gurus.exception.ex_user.ex.DuplicateNicknameException;
 import com.team04.buy_gurus.exception.ex_user.ex.UnverifiedEmailException;
 import com.team04.buy_gurus.exception.ex_user.ex.UserNotFoundException;
-import com.team04.buy_gurus.user.dto.SignupRequestDto;
-import com.team04.buy_gurus.user.dto.UserEditRequestDto;
-import com.team04.buy_gurus.user.dto.UserEditResponseDto;
-import com.team04.buy_gurus.user.dto.UserInfoResponseDto;
+import com.team04.buy_gurus.user.dto.*;
 import com.team04.buy_gurus.user.entity.Provider;
 import com.team04.buy_gurus.user.entity.Role;
 import com.team04.buy_gurus.user.entity.User;
@@ -32,14 +29,7 @@ public class UserService {
     @Transactional
     public void signup(SignupRequestDto request) {
 
-        ValueOperations<String, String> valueOps = redisTemplate.opsForValue();
-        String isVerified = valueOps.get(request.getEmail() + ":verified");
-
-        if (isVerified.equals("true")) {
-            redisTemplate.delete(request.getEmail() + ":verified");
-        } else {
-            throw new UnverifiedEmailException();
-        }
+        checkEmailVerified(request.getEmail());
 
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new DuplicateEmailException();
@@ -70,27 +60,39 @@ public class UserService {
 
     public UserEditResponseDto editUserInfo(String email, UserEditRequestDto request) {
 
-        ValueOperations<String, String> valueOps = redisTemplate.opsForValue();
-        String isVerified = valueOps.get(request.getEmail() + ":verified");
-
-        if (isVerified.equals("true")) {
-            redisTemplate.delete(request.getEmail() + ":verified");
-        } else {
-            throw new UnverifiedEmailException();
-        }
-
         return userRepository.findByEmail(email)
                 .map(user -> {
                     if (userRepository.findByNickname(request.getNickname()).isEmpty()) {
                         user.updateNickname(request.getNickname());
                     }
                     if (userRepository.findByEmail(request.getEmail()).isEmpty()){
+                        checkEmailVerified(request.getEmail());
                         user.updateEmail(request.getEmail());
                     }
                     userRepository.save(user);
                     return new UserEditResponseDto(request.getNickname(), request.getEmail());
                 })
                 .orElseThrow(UserNotFoundException::new);
+    }
+
+    public void sellerRegistration(String email, SellerRegistrationRequestDto request) {
+
+        userRepository.findByEmail(email)
+                .ifPresentOrElse(User::updateRole,
+                        () -> {
+                    throw new UserNotFoundException();
+                });
+    }
+
+    public void resetPassword(ResetPasswordRequestDto request) {
+
+        checkEmailVerified(request.getEmail());
+
+        userRepository.findByEmail(request.getEmail())
+                .ifPresentOrElse(user -> user.updatePassword(passwordEncoder.encode(request.getPassword())),
+                        () -> {
+                            throw new UserNotFoundException();
+                        });
     }
 
     public void withdrawal(String email) {
@@ -103,7 +105,20 @@ public class UserService {
     }
 
     public User findByEmail(String email) {
+
         return userRepository.findByEmail(email)
                 .orElseThrow(UserNotFoundException::new);
+    }
+
+    public void checkEmailVerified(String email) {
+
+        ValueOperations<String, String> valueOps = redisTemplate.opsForValue();
+        String isVerified = valueOps.get(email + ":verified");
+
+        if (isVerified != null) {
+            redisTemplate.delete(email + ":verified");
+        } else {
+            throw new UnverifiedEmailException();
+        }
     }
 }
