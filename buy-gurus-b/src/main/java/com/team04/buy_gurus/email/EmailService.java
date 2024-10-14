@@ -19,6 +19,9 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class EmailService {
 
+    private static final int VERIFY_CODE_EXPIRATION_TIME = 5;
+    private static final int EMAIL_VERIFIED_EXPIRATION_TIME = 10;
+
     private final JavaMailSender mailSender;
     private final StringRedisTemplate redisTemplate;
 
@@ -26,7 +29,7 @@ public class EmailService {
 
         String verificationCode = generateVerificationCode();
         ValueOperations<String, String> valueOps = redisTemplate.opsForValue();
-        valueOps.set(email, verificationCode, 5, TimeUnit.MINUTES);
+        valueOps.set(email, verificationCode, VERIFY_CODE_EXPIRATION_TIME, TimeUnit.MINUTES);
 
         log.info(valueOps.get(email));
 
@@ -58,7 +61,7 @@ public class EmailService {
             throw new CodeMismatchException();
         }
 
-        valueOps.set(email + ":verified", "true", 10, TimeUnit.MINUTES);
+        valueOps.set(email + ":verified", "true", EMAIL_VERIFIED_EXPIRATION_TIME, TimeUnit.MINUTES);
         log.info(valueOps.get(email + ":verified"));
         redisTemplate.delete(email);
     }

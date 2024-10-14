@@ -2,6 +2,7 @@ package com.team04.buy_gurus.exception.ex_user;
 
 import com.team04.buy_gurus.exception.ErrorResponse;
 import com.team04.buy_gurus.exception.ex_user.ex.*;
+import jakarta.mail.MessagingException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -16,7 +17,8 @@ public class UserExceptionHandler {
     private static final String UNVERIFIED_EMAIL_ERROR = "UNVERIFIED_EMAIL";
     private static final String CODE_MISMATCH_ERROR = "CODE_MISMATCH";
     private static final String CODE_EXPIRED_ERROR = "CODE_EXPIRED";
-    // 토큰 관련 예외?
+    private static final String FAILED_SEND_EMAIL_ERROR = "FAILED_SEND_EMAIL";
+
     @ExceptionHandler(DuplicateNicknameException.class)
     public ResponseEntity<ErrorResponse> handleDuplicateNickname(DuplicateNicknameException e) {
         ErrorResponse errorResponse = new ErrorResponse(DUPLICATE_NICKNAME_ERROR, e.getMessage());
@@ -51,6 +53,12 @@ public class UserExceptionHandler {
     public ResponseEntity<ErrorResponse> handleCodeExpired(CodeExpiredException e) {
         ErrorResponse errorResponse = new ErrorResponse(CODE_EXPIRED_ERROR, e.getMessage());
         return ResponseEntity.status(HttpStatus.GONE).body(errorResponse);
+    }
+
+    @ExceptionHandler(MessagingException.class)
+    public ResponseEntity<ErrorResponse> handleMessagingException(MessagingException e) {
+        ErrorResponse errorResponse = new ErrorResponse(FAILED_SEND_EMAIL_ERROR, "이메일 전송 실패");
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }
 }
 

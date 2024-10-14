@@ -25,63 +25,63 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-//@RequestMapping("api/user")
+//@RequestMapping("/api")
 public class UserController {
 
     private final UserService userService;
     private final JwtService jwtService;
 
     @PostMapping("/signup")
-    public ResponseEntity<Void> createUser(@RequestBody @Valid SignupRequestDto request) {
+    public ResponseEntity<UserResponse<Void>> createUser(@RequestBody @Valid SignupRequestDto request) {
 
             userService.signup(request);
-            return ResponseEntity.status(HttpStatus.CREATED).build();
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(new UserResponse<>("회원가입 성공", null));
     }
 
     @GetMapping("/userMe")
-    public ResponseEntity<UserInfoResponseDto> readUser(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<UserResponse<UserInfoResponseDto>> readUser(@AuthenticationPrincipal UserDetails userDetails) {
 
             UserInfoResponseDto response = userService.loadUserInfo(userDetails.getUsername());
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(new UserResponse<>("유저 정보 조회 성공", response));
     }
 
-    // Void로 바꿔야 하나?
     @PatchMapping("/userMe")
-    public ResponseEntity<UserEditResponseDto> updateUser(@AuthenticationPrincipal UserDetails userDetails, @RequestBody @Valid UserEditRequestDto request) {
+    public ResponseEntity<UserResponse<UserEditResponseDto>> updateUser(@AuthenticationPrincipal UserDetails userDetails, @RequestBody @Valid UserEditRequestDto request) {
 
             UserEditResponseDto response = userService.editUserInfo(userDetails.getUsername(), request);
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(new UserResponse<>("회원 정보 수정 성공", response));
     }
 
-    @PatchMapping("seller-registration")
-    public ResponseEntity<Void> updateRole(@AuthenticationPrincipal UserDetails userDetails, @RequestBody @Valid SellerRegistrationRequestDto request) {
+    @PatchMapping("/seller-registration")
+    public ResponseEntity<UserResponse<Void>> updateRole(@AuthenticationPrincipal UserDetails userDetails) {
 
-        userService.sellerRegistration(userDetails.getUsername(), request);
-        return ResponseEntity.ok().build();
+        userService.sellerRegistration(userDetails.getUsername());
+        return ResponseEntity.ok(new UserResponse<>("판매자 등록 성공", null));
     }
 
     @PatchMapping("/reset-password")
-    public ResponseEntity<Void> updatePassword(@RequestBody @Valid ResetPasswordRequestDto request) {
+    public ResponseEntity<UserResponse<Void>> updatePassword(@RequestBody @Valid ResetPasswordRequestDto request) {
 
         userService.resetPassword(request);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(new UserResponse<>("비밀번호 재설정 성공", null));
     }
 
-    // 소프트 딜리트로 바꿔야 하나?
     @DeleteMapping("/userMe")
-    public ResponseEntity<Void> deleteUser(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<UserResponse<Void>> deleteUser(@AuthenticationPrincipal UserDetails userDetails) {
 
             userService.withdrawal(userDetails.getUsername());
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+            return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                    .body(new UserResponse<>("회원 탈퇴 성공", null));
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(HttpServletResponse response) {
+    public ResponseEntity<UserResponse<Void>> logout(HttpServletResponse response) {
 
         jwtService.removeAccessTokenToCookie(response);
         jwtService.removeRefreshTokenToCookie(response);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(new UserResponse<>("로그아웃 성공", null));
     }
 
 }
