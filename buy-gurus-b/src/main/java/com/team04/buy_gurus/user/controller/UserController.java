@@ -84,4 +84,11 @@ public class UserController {
         return ResponseEntity.ok(new UserResponse<>("로그아웃 성공", null));
     }
 
+    @PostMapping("token")
+    public ResponseEntity<UserResponse<Void>> tokenReissue(HttpServletRequest request, HttpServletResponse response) throws IOException{
+
+        jwtService.tokenReissue(request, response);
+        return ResponseEntity.ok(new UserResponse<>("토큰 재발급 성공", null));
+    }
+
 }

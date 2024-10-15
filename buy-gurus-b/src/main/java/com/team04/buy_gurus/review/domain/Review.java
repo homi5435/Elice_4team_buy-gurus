@@ -38,9 +38,9 @@ public class Review {
     @Column(name = "user_id")
     private Long userId; // 사용자 ID
 
-    public OAuth2UserInfo getUser() {
-        return null;
-    }
+//    public OAuth2UserInfo getUser() {
+//        return null;
+//    }
 
 //    @ManyToOne
 //    @JoinColumn(name = "user_id", insertable = false, updatable = false)

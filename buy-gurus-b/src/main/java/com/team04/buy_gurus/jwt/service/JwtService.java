@@ -5,6 +5,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.team04.buy_gurus.exception.ex_user.ex.UserNotFoundException;
 import com.team04.buy_gurus.jwt.JwtProperties;
+import com.team04.buy_gurus.user.entity.User;
 import com.team04.buy_gurus.user.repository.UserRepository;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.Optional;
 
@@ -148,5 +150,28 @@ public class JwtService {
         refreshTokenCookie.setPath("/");
         refreshTokenCookie.setMaxAge(0);
         response.addCookie(refreshTokenCookie);
+    }
+
+    public void tokenReissue(HttpServletRequest request, HttpServletResponse response) throws IOException {
+
+        String refreshToken = extractRefreshToken(request)
+                .filter(this::isTokenValid)
+                .orElse(null);
+
+        if (refreshToken != null) {
+            User user = userRepository.findByRefreshToken(refreshToken)
+                    .orElseThrow(UserNotFoundException::new);
+
+            String newAccessToken = createAccessToken(user.getId());
+            String newRefreshToken = createRefreshToken();
+
+            user.updateRefreshToken(newRefreshToken);
+            userRepository.saveAndFlush(user);
+
+            addAccessTokenToCookie(response, newAccessToken);
+            addRefreshTokenToCookie(response, newRefreshToken);
+        } else {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+        }
     }
 }

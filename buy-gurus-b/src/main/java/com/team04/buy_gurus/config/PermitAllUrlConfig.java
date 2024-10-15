@@ -19,7 +19,8 @@ public class PermitAllUrlConfig {
                 "/signup",
                 "/oauth2/authorization/**",
                 "/api/auth/**",
-                "/reset-password"
+                "/reset-password",
+                "token"
         );
     }
 }

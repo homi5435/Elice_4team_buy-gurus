@@ -2,6 +2,7 @@ package com.team04.buy_gurus.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team04.buy_gurus.jwt.filter.CustomJsonUsernamePasswordAuthenticationFilter;
+import com.team04.buy_gurus.jwt.filter.JwtAuthenticationEntryPoint;
 import com.team04.buy_gurus.jwt.filter.JwtAuthenticationFilter;
 import com.team04.buy_gurus.jwt.handler.LoginFailureHandler;
 import com.team04.buy_gurus.jwt.handler.LoginSuccessHandler;
@@ -44,6 +45,7 @@ public class SecurityConfig {
     private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final PermitAllUrlConfig permitAllUrlConfig;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -67,11 +69,10 @@ public class SecurityConfig {
                 )
                 .addFilterAfter(customJsonUsernamePasswordAuthenticationFilter(), LogoutFilter.class)
                 .addFilterBefore(jwtAuthenticationProcessingFilter(), CustomJsonUsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling(exceptionHandling -> exceptionHandling
-                        .defaultAuthenticationEntryPointFor(
-                                new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
-                                new AntPathRequestMatcher("/api/**"))
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                 );
+
 
         return http.build();
     }
