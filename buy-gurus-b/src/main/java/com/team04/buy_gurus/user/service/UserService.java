@@ -75,7 +75,7 @@ public class UserService {
                 .orElseThrow(UserNotFoundException::new);
     }
 
-    public void sellerRegistration(String email, SellerRegistrationRequestDto request) {
+    public void sellerRegistration(String email) {
 
         userRepository.findByEmail(email)
                 .ifPresentOrElse(User::updateRole,
@@ -89,7 +89,10 @@ public class UserService {
         checkEmailVerified(request.getEmail());
 
         userRepository.findByEmail(request.getEmail())
-                .ifPresentOrElse(user -> user.updatePassword(passwordEncoder.encode(request.getPassword())),
+                .ifPresentOrElse(user -> {
+                    user.updatePassword(passwordEncoder.encode(request.getPassword()));
+                    userRepository.save(user);
+                },
                         () -> {
                             throw new UserNotFoundException();
                         });
