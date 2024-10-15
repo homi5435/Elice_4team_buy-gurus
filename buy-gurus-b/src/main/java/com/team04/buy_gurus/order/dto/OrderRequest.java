@@ -28,7 +28,9 @@ public class OrderRequest {
 
         @Positive(message = "물건 개수는 1 이상이어야 합니다.")
         private int quantity;
-        // private int productId;
+
+        @Positive(message = "물건 id는 1 이상이어야 합니다.")
+        private Long productId;
     }
 
     @Getter

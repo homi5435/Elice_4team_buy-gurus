@@ -8,6 +8,8 @@ import com.team04.buy_gurus.order.dto.OrderRequest.OrderInfoRequest;
 import com.team04.buy_gurus.order.dto.OrderUpdateRequest;
 import com.team04.buy_gurus.order.repository.OrderInfoRepository;
 import com.team04.buy_gurus.order.repository.OrderRepository;
+import com.team04.buy_gurus.product.domain.Product;
+import com.team04.buy_gurus.product.repository.ProductRepository;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -25,34 +27,42 @@ import java.util.List;
 public class OrderService {
     private OrderInfoRepository orderInfoRepository;
     private OrderRepository orderRepository;
+    private ProductRepository productRepository;
 
     @Autowired
-    public OrderService(OrderInfoRepository orderInfoRepository, OrderRepository orderRepository) {
+    public OrderService(
+            OrderInfoRepository orderInfoRepository,
+            OrderRepository orderRepository,
+            ProductRepository productRepository
+    )  {
         this.orderInfoRepository = orderInfoRepository;
         this.orderRepository = orderRepository;
+        this.productRepository = productRepository;
     }
 
-    private List<OrderInfo> saveOrderInfos(List<OrderInfoRequest> orderRequest) {
+    private List<OrderInfo> createOrderInfos(List<OrderInfoRequest> orderRequest, Order order) {
         List<OrderInfo> orderInfoList = new ArrayList<>();
         for (OrderInfoRequest orderInfoRequest : orderRequest) {
-            orderInfoList.add(new OrderInfo(orderInfoRequest));
+            Product product = productRepository.findById(orderInfoRequest.getProductId()).orElse(null);
+            orderInfoList.add(new OrderInfo(orderInfoRequest, product, order));
         }
-        return orderInfoRepository.saveAll(orderInfoList);
+        return orderInfoList;
     }
 
     @Transactional
     public void save(OrderRequest orderRequest) {
-        List<OrderInfo> orderInfoList = saveOrderInfos(orderRequest.getOrderInfoList());
 
         OrderRequest.ShippingInfo shippingInfo = orderRequest.getShippingInfo();
         Order order = Order.builder()
-                .orderInfoList(orderInfoList)
                 .status(Order.Status.PROCESSING)
                 .shippingAddress(shippingInfo.getAddress())
                 .customerName(shippingInfo.getName())
                 .customerPhoneNum(shippingInfo.getPhoneNum())
                 .shippingFee(orderRequest.getShippingFee())
                 .build();
+
+        List<OrderInfo> orderInfoList = createOrderInfos(orderRequest.getOrderInfoList(), order);
+        order.setOrderInfoList(orderInfoList);
 
         orderRepository.save(order);
     }
@@ -70,6 +80,11 @@ public class OrderService {
         } else {
             paged = orderRepository.findAllByIsDeletedFalse(pageable);
         }
+//        List<OrderInfo> info = orderInfoRepository.findOrderInfoByUserIdAndProductId(1L, 1L);
+//        info.forEach(System.out::println);
+
+        List<OrderInfo> infos = orderInfoRepository.findOrderInfoByProductId(1L);
+        infos.forEach(System.out::println);
         return paged;
     }
 

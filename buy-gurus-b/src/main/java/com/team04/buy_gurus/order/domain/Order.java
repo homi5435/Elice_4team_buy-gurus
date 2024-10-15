@@ -48,26 +48,20 @@ public class Order {
     @ColumnDefault("0")
     private int shippingFee;
 
-    // 유저 id
-
     // 주문자 정보
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
     private String shippingAddress;
     private String customerName;
     private String customerPhoneNum;
 
-    // 판매자 ID
-
-
     // 판매자 정보
     private String sellerName;
     private String sellerPhoneNum;
-    private String seller_company;
+    private String sellerCompany;
 
-    @OneToMany
-    @JoinColumn(name = "orders_id")
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderInfo> orderInfoList;
 
     @AllArgsConstructor
@@ -96,6 +90,10 @@ public class Order {
         this.shippingAddress = request.getAddress();
         this.customerName = request.getName();
         this.customerPhoneNum = request.getPhoneNum();
+    }
+
+    public void setOrderInfoList(List<OrderInfo> orderInfoList) {
+        this.orderInfoList = orderInfoList;
     }
 
     public static Status fromString(String status) {
