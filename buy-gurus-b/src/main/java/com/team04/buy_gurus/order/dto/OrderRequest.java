@@ -21,10 +21,13 @@ public class OrderRequest {
     @Valid
     private ShippingInfo shippingInfo;
 
+    @Positive(message = "판매자 id가 존재하지 않습니다.")
+    private Long sellerId;
+
     @Getter
     public static class OrderInfoRequest {
-        @PositiveOrZero(message = "가격은 0 이상이어야 합니다.")
-        private int price;
+//        @PositiveOrZero(message = "가격은 0 이상이어야 합니다.")
+//        private int price;
 
         @Positive(message = "물건 개수는 1 이상이어야 합니다.")
         private int quantity;
