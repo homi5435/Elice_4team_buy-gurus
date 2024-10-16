@@ -2,6 +2,7 @@ package com.team04.buy_gurus.order.domain;
 
 import com.team04.buy_gurus.address.domain.AddressInfo;
 import com.team04.buy_gurus.order.dto.OrderUpdateRequest;
+import com.team04.buy_gurus.sellerinfo.entity.SellerInfo;
 import com.team04.buy_gurus.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -57,6 +58,9 @@ public class Order {
     private String customerPhoneNum;
 
     // 판매자 정보
+    @ManyToOne
+    @JoinColumn(name = "seller_info_id")
+    private SellerInfo sellerInfo;
     private String sellerName;
     private String sellerPhoneNum;
     private String sellerCompany;
@@ -76,6 +80,7 @@ public class Order {
         private final String status;
     }
 
+
     public void setInvoice(OrderUpdateRequest.Invoice request) {
         this.invoiceNum = request.getInvoiceNum();
         this.shippingCompany = request.getShippingCompany();
@@ -94,6 +99,13 @@ public class Order {
 
     public void setOrderInfoList(List<OrderInfo> orderInfoList) {
         this.orderInfoList = orderInfoList;
+    }
+
+    public void setSeller(SellerInfo sellerInfo) {
+        this.sellerInfo = sellerInfo;
+        this.sellerCompany = sellerInfo.getTradeName();
+        this.sellerName = sellerInfo.getUser().getNickname();
+        this.sellerPhoneNum = sellerInfo.getBusinessPhoneNum();
     }
 
     public static Status fromString(String status) {
