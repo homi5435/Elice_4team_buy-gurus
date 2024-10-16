@@ -6,7 +6,6 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 import org.hibernate.annotations.SQLDelete;
 
 @Entity
@@ -24,7 +23,7 @@ public class OrderInfo {
     private int quantity;
 
     // 주문 당시 정보
-    private int price;
+    private Long price;
     private String productName;
     private String productImageUrl;
 
@@ -42,8 +41,14 @@ public class OrderInfo {
 
     public OrderInfo(OrderRequest.OrderInfoRequest orderInfoRequest, Product product, Order order) {
         this.quantity = orderInfoRequest.getQuantity();
-        this.price = orderInfoRequest.getPrice();
+        this.productName = product.getName();
         this.product = product;
         this.order = order;
+        this.price = product.getPrice();
+        // product image 추가 필요
+    }
+
+    public void setIsReviewed() {
+        isReviewed = true;
     }
 }
