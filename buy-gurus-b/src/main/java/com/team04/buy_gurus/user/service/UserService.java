@@ -4,6 +4,8 @@ import com.team04.buy_gurus.exception.ex_user.ex.DuplicateEmailException;
 import com.team04.buy_gurus.exception.ex_user.ex.DuplicateNicknameException;
 import com.team04.buy_gurus.exception.ex_user.ex.UnverifiedEmailException;
 import com.team04.buy_gurus.exception.ex_user.ex.UserNotFoundException;
+import com.team04.buy_gurus.sellerinfo.entity.SellerInfo;
+import com.team04.buy_gurus.sellerinfo.repository.SellerInfoRepository;
 import com.team04.buy_gurus.user.dto.*;
 import com.team04.buy_gurus.user.entity.Provider;
 import com.team04.buy_gurus.user.entity.Role;
@@ -17,6 +19,8 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -25,6 +29,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final StringRedisTemplate redisTemplate;
+    private final SellerInfoRepository sellerInfoRepository;
 
     @Transactional
     public void signup(SignupRequestDto request) {
@@ -76,12 +81,27 @@ public class UserService {
     }
 
     public void sellerRegistration(String email) {
+        // TODO
+        // 중복 Seller 가입 체크를 깔끔하게 작성!
+        Optional<User> user = userRepository.findByEmail(email);
 
-        userRepository.findByEmail(email)
-                .ifPresentOrElse(User::updateRole,
-                        () -> {
+        user.ifPresentOrElse(User::updateRole,
+                () -> {
                     throw new UserNotFoundException();
-                });
+                }
+        );
+
+        // 간단한 중복 Seller 가입 체크
+        sellerInfoRepository.findByUseremail(email).ifPresentOrElse(si -> {}, () -> {
+            User sellerUser = user.get();
+            SellerInfo sellerInfo = SellerInfo.builder()
+                    .user(sellerUser)
+                    .build();
+            sellerInfoRepository.save(sellerInfo);
+            sellerUser.updateSellerInfo(sellerInfo);
+        });
+
+
     }
 
     public void resetPassword(ResetPasswordRequestDto request) {
