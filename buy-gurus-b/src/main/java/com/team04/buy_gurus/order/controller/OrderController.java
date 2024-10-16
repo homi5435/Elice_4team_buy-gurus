@@ -18,7 +18,11 @@ public class OrderController {
     // 주문 완료 시 저장
     @PostMapping
     public ResponseEntity<?> saveOrder(@Valid @RequestBody OrderRequest orderRequest) {
-        orderService.save(orderRequest);
+        try {
+            orderService.save(orderRequest);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
         return ResponseEntity.ok().build();
     }
 
