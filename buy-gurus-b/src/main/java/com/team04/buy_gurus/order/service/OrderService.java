@@ -111,7 +111,7 @@ public class OrderService {
         Page<Order> paged;
         String email = getEmailFromUserdetails(userDetails);
         if (typeReq.getType().equals("c")) {
-            User user = userRepository.findByEmail(email).orElse(null);
+            User user = userRepository.findByEmail(email).orElseThrow(() -> new Exception("구매내역이 존재하지 않습니다."));
             paged = orderRepository.findAllByUser(user.getId(), pageable);
         } else {
             SellerInfo sellerInfo = sellerInfoRepository.findByUseremail(email).orElseThrow(() -> new Exception("판매자가 아닙니다."));
