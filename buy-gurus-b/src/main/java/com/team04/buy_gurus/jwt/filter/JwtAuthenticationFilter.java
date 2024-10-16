@@ -1,6 +1,7 @@
 package com.team04.buy_gurus.jwt.filter;
 
 import com.team04.buy_gurus.config.PermitAllUrlConfig;
+import com.team04.buy_gurus.exception.ex_user.ex.CustomAuthenticationException;
 import com.team04.buy_gurus.exception.ex_user.ex.UserNotFoundException;
 import com.team04.buy_gurus.jwt.service.JwtService;
 import com.team04.buy_gurus.user.entity.User;
@@ -14,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.authority.mapping.NullAuthoritiesMapper;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -40,12 +42,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        if (filterSkip(request)){
-            filterChain.doFilter(request, response);
-            log.info("JwtAuthenticationFilter 생략");
-            return;
-        }
-
         log.info("JwtAuthenticationFilter 동작");
         String accessToken = jwtService.extractAccessToken(request)
                 .filter(jwtService::isTokenValid)
@@ -57,51 +53,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             checkAccessTokenAndAuthentication(request, response, filterChain, accessToken);
         }
 
-        if (accessToken == null) {
-            log.info("엑세스 토큰 검증 실패");
-            String refreshToken = jwtService.extractRefreshToken(request)
-                    .filter(jwtService::isTokenValid)
-                    .orElse(null);
-
-            if (refreshToken != null) {
-                User user = userRepository.findByRefreshToken(refreshToken)
-                        .orElseThrow(UserNotFoundException::new);
-                checkRefreshTokenAndReIssueAccessToken(response, user);
-            }
-
-            if (refreshToken == null) {
-                response.sendRedirect(REDIRECT_URL);
-            }
-
-            filterChain.doFilter(request, response);
-        }
-    }
-
-    private boolean filterSkip(HttpServletRequest request) {
-
-        List<String> permiitAllUrls = permitAllUrlConfig.getPermitAllUrls();
-
-        for (String url : permiitAllUrls) {
-            if(request.getRequestURI().startsWith(url.replace("**", ""))) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public void checkRefreshTokenAndReIssueAccessToken(HttpServletResponse response, User user) {
-
-        reIssueRefreshToken(user);
-        response.setStatus(HttpServletResponse.SC_OK);
-        String accessToken = jwtService.createAccessToken(user.getId());
-        jwtService.addAccessTokenToCookie(response, accessToken);
-    }
-
-    private void reIssueRefreshToken(User user) {
-
-        String refreshToken = jwtService.createRefreshToken();
-        user.updateRefreshToken(refreshToken);
-        userRepository.saveAndFlush(user);
+        filterChain.doFilter(request, response);
     }
 
     public void checkAccessTokenAndAuthentication(HttpServletRequest request,
