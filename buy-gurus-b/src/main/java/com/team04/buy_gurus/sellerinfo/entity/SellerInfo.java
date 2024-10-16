@@ -30,7 +30,8 @@ public class SellerInfo {
     @Column(name = "business_adress")
     private String businessAdress;
 
-    @OneToOne(mappedBy = "sellerInfo")
+    @OneToOne
+    @JoinColumn(name = "user_id")
     private User user;
 
     // 필수 서류

@@ -47,8 +47,7 @@ public class User {
     @Column(name = "refresh_token", nullable = true)
     private String refreshToken;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "seller_info_id", nullable = true)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private SellerInfo sellerInfo;
 
     public void updateRefreshToken(String refreshToken) {
@@ -70,4 +69,9 @@ public class User {
     public void updatePassword(String password) {
         this.password = password;
     }
+
+    public void updateSellerInfo(SellerInfo sellerInfo){
+        this.sellerInfo = sellerInfo;
+    }
 }
+
