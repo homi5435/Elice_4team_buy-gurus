@@ -20,7 +20,7 @@ public class PermitAllUrlConfig {
                 "/oauth2/authorization/**",
                 "/api/auth/**",
                 "/reset-password",
-                "token"
+                "/token"
         );
     }
 }
