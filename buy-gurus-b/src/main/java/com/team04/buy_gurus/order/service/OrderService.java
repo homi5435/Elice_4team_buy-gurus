@@ -1,12 +1,18 @@
 package com.team04.buy_gurus.order.service;
 
+import com.team04.buy_gurus.common.enums.CommonError;
 import com.team04.buy_gurus.order.domain.Order;
 import com.team04.buy_gurus.order.domain.OrderInfo;
 import com.team04.buy_gurus.order.dto.OrderPageRequest;
 import com.team04.buy_gurus.order.dto.OrderRequest;
 import com.team04.buy_gurus.order.dto.OrderRequest.OrderInfoRequest;
 import com.team04.buy_gurus.order.dto.OrderUpdateRequest;
+import com.team04.buy_gurus.exception.ex_order.exception.NotExistsSellerException;
+import com.team04.buy_gurus.exception.ex_order.exception.NotOrderedException;
+import com.team04.buy_gurus.exception.ex_order.exception.NotSellerException;
+import com.team04.buy_gurus.exception.ex_order.exception.NotSoldException;
 import com.team04.buy_gurus.order.repository.OrderRepository;
+import com.team04.buy_gurus.product.aop.ProductNotFoundException;
 import com.team04.buy_gurus.product.domain.Product;
 import com.team04.buy_gurus.product.repository.ProductRepository;
 import com.team04.buy_gurus.sellerinfo.entity.SellerInfo;
@@ -19,8 +25,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,6 +41,8 @@ public class OrderService {
     private SellerInfoRepository sellerInfoRepository;
     private UserRepository userRepository;
 
+    private StringBuilder sb;
+
     @Autowired
     public OrderService(
             OrderRepository orderRepository,
@@ -48,14 +54,33 @@ public class OrderService {
         this.productRepository = productRepository;
         this.sellerInfoRepository = sellerInfoRepository;
         this.userRepository = userRepository;
+        this.sb = new StringBuilder();
     }
 
-    private List<OrderInfo> createOrderInfos(List<OrderInfoRequest> orderRequest, Order order) throws Exception {
+    private List<OrderInfo> createOrderInfos(List<OrderInfoRequest> orderRequest, Order order) {
         List<OrderInfo> orderInfoList = new ArrayList<>();
+        List<Long> notExistsProductList = new ArrayList<>();
         for (OrderInfoRequest orderInfoRequest : orderRequest) {
-            Product product = productRepository.findById(orderInfoRequest.getProductId())
-                    .orElseThrow(() -> new Exception("product: " + orderInfoRequest.getProductId() + " is not exists"));
-            orderInfoList.add(new OrderInfo(orderInfoRequest, product, order));
+            try {
+                Product product = productRepository.findById(orderInfoRequest.getProductId())
+                        .orElseThrow(RuntimeException::new);
+                orderInfoList.add(new OrderInfo(orderInfoRequest, product, order));
+            } catch (Exception e) {
+                notExistsProductList.add(orderInfoRequest.getProductId());
+            }
+        }
+
+        if (!notExistsProductList.isEmpty()) {
+            sb.setLength(0);
+            sb.append("제품 ID가 등록되지 않았습니다. 다시 주문해주세요.: [");
+            for (int i = 0; i < notExistsProductList.size(); i++) {
+                sb.append(notExistsProductList.get(i));
+                if (i < notExistsProductList.size() - 1) {
+                    sb.append(", ");
+                }
+            }
+            sb.append("]");
+            throw new ProductNotFoundException(sb.toString());
         }
         return orderInfoList;
     }
@@ -68,10 +93,10 @@ public class OrderService {
     public void save(OrderRequest orderRequest, UserDetails userDetails) throws Exception {
         OrderRequest.ShippingInfo shippingInfo = orderRequest.getShippingInfo();
 
-        SellerInfo sellerInfo = sellerInfoRepository.findById(orderRequest.getSellerId()).orElseThrow(() -> new Exception("seller: " + orderRequest.getSellerId() + " is not exists"));
+        SellerInfo sellerInfo = sellerInfoRepository.findById(orderRequest.getSellerId()).orElseThrow(() -> new NotExistsSellerException(CommonError.SELLER_NOT_FOUND));
 
         String email = getEmailFromUserdetails(userDetails);
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new Exception("User is not exists"));
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new NotOrderedException(CommonError.USER_NOT_ORDERED));
 
         Order order = Order.builder()
                 .status(Order.Status.PROCESSING)
@@ -90,14 +115,14 @@ public class OrderService {
         orderRepository.save(order);
     }
 
-    public Order getOrder(Long orderId, UserDetails userDetails) throws Exception {
+    public Order getOrder(Long orderId, UserDetails userDetails) {
         String email = getEmailFromUserdetails(userDetails);
         User user = userRepository.findByEmail(email).get();
         Optional<Order> orderOptional = orderRepository.findByOrderIdAndUserId(orderId, user.getId());
         if (orderOptional.isPresent()) {
             return orderOptional.get();
         } else {
-            throw new Exception("해당 유저의 주문 내역이 아닙니다.");
+            throw new NotOrderedException(CommonError.USER_NOT_ORDERED);
         }
     }
 
@@ -105,20 +130,19 @@ public class OrderService {
             OrderPageRequest.Type typeReq,
             OrderPageRequest.Pageable pageReq,
             UserDetails userDetails
-    ) throws Exception {
+    ) {
+        String email = getEmailFromUserdetails(userDetails);
         Sort sort = Sort.by(Sort.Direction.DESC, "id");
         Pageable pageable = PageRequest.of(pageReq.getPage() - 1, pageReq.getSize(), sort);
-        Page<Order> paged;
-        String email = getEmailFromUserdetails(userDetails);
+
         if (typeReq.getType().equals("c")) {
-            User user = userRepository.findByEmail(email).orElseThrow(() -> new Exception("구매내역이 존재하지 않습니다."));
-            paged = orderRepository.findAllByUser(user.getId(), pageable);
+            User user = userRepository.findByEmail(email).orElseThrow(() -> new NotOrderedException(CommonError.USER_NOT_ORDERED));
+            return orderRepository.findAllByUser(user.getId(), pageable);
         } else {
-            SellerInfo sellerInfo = sellerInfoRepository.findByUseremail(email).orElseThrow(() -> new Exception("판매자가 아닙니다."));
+            SellerInfo sellerInfo = sellerInfoRepository.findByUseremail(email).orElseThrow(() -> new NotSellerException(CommonError.SELLER_NOT_SOLD));
             User seller = sellerInfo.getUser();
-            paged = orderRepository.findAllBySellerInfo(seller.getId(), pageable);
+            return orderRepository.findAllBySellerInfo(seller.getId(), pageable);
         }
-        return paged;
     }
 
     private Order findOrderById(Long orderId) {
@@ -127,13 +151,13 @@ public class OrderService {
 
     private void isValidSeller(Order order, UserDetails userDetails) throws Exception {
         String email = getEmailFromUserdetails(userDetails);
-        sellerInfoRepository.findByUseremail(email).orElseThrow(() -> new Exception("판매자가 아닙니다."));
-        if (!order.getSellerInfo().getUser().getEmail().equals(email)) throw new Exception("해당 판매자는 편집 권한이 없습니다.");
+        sellerInfoRepository.findByUseremail(email).orElseThrow(() -> new NotSellerException(CommonError.NOT_SELLER));
+        if (!order.getSellerInfo().getUser().getEmail().equals(email)) throw new NotSoldException(CommonError.SELLER_NOT_ASSIGN_EDIT);
     }
 
     private void isValidUser(Order order, UserDetails userDetails) throws Exception {
         String email = getEmailFromUserdetails(userDetails);
-        if (!order.getUser().getEmail().equals(email)) throw new Exception("편집 권한이 존재하지 않습니다.");
+        if (!order.getUser().getEmail().equals(email)) throw new NotOrderedException(CommonError.USER_NOT_ASSIGN_EDIT);
     }
 
     @Transactional
