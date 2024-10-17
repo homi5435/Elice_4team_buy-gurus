@@ -2,7 +2,7 @@ spring:
   # H2 Database 설정
   datasource:
     driver-class-name: org.h2.Driver
-    url: 'jdbc:h2:mem:test'   # H2 DB 연결 주소 (In-Memory Mode)
+    url:  'jdbc:h2:mem:test'  # H2 DB 연결 주소 (In-Memory Mode)
     #url: 'jdbc:h2:~/test'    # H2 DB 연결 주소 (Embedded Mode)
     username: sa        # H2 DB 접속 ID (사용자 지정)
 
@@ -23,23 +23,17 @@ spring:
         format_sql: true      # 쿼리 로그 포맷 (정렬)
         show_sql: true        # 쿼리 로그 출력
 
+  redis:
+    host: localhost
+    port: 6379
 
   config:
     import:
       - s3bucket.yml
+      - security.yml
 
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            client-id: 90079091124-rmkh10vsnapnj9kp7abrao82mqiuvkoq.apps.googleusercontent.com
-            client-secret: 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
-            scope: profile, email
-
-    jwt:
-      secretKey: "yourverylongsecretkeyshouldbe64bytesormore1234567890"
-      accessTokenExpiration: 3600
-      refreshTokenExpiration: 604800
-      accessTokenHeader: "Authorization"
-      refreshTokenHeader: "Authorization-refresh"
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG

@@ -38,3 +38,4 @@ out/
 
 # 모든 yml 파일 무시
 s3bucket.yml
+security.yml

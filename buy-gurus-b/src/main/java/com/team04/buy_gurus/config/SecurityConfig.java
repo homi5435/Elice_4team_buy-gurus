@@ -2,6 +2,7 @@ package com.team04.buy_gurus.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team04.buy_gurus.jwt.filter.CustomJsonUsernamePasswordAuthenticationFilter;
+import com.team04.buy_gurus.jwt.filter.JwtAuthenticationEntryPoint;
 import com.team04.buy_gurus.jwt.filter.JwtAuthenticationFilter;
 import com.team04.buy_gurus.jwt.handler.LoginFailureHandler;
 import com.team04.buy_gurus.jwt.handler.LoginSuccessHandler;
@@ -43,9 +44,12 @@ public class SecurityConfig {
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
     private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
     private final CustomOAuth2UserService customOAuth2UserService;
+    private final PermitAllUrlConfig permitAllUrlConfig;
+    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
         http
                 .formLogin(formLogin -> formLogin.disable())
                 .httpBasic(httpBasic -> httpBasic.disable())
@@ -56,8 +60,7 @@ public class SecurityConfig {
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/", "/css/**", "/images/**", "/js/**", "/favicon.ico", "/h2-console").permitAll()
-                        .requestMatchers("/signup", "/oauth2/authorization/**").permitAll()
+                        .requestMatchers(permitAllUrlConfig.getPermitAllUrls().toArray(String[]::new)).permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
@@ -67,10 +70,8 @@ public class SecurityConfig {
                 )
                 .addFilterAfter(customJsonUsernamePasswordAuthenticationFilter(), LogoutFilter.class)
                 .addFilterBefore(jwtAuthenticationProcessingFilter(), CustomJsonUsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling(exceptionHandling -> exceptionHandling
-                        .defaultAuthenticationEntryPointFor(
-                                new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED),
-                                new AntPathRequestMatcher("/api/**"))
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                 );
 
         return http.build();
@@ -127,7 +128,7 @@ public class SecurityConfig {
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationProcessingFilter() {
-        JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtService, userRepository);
+        JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtService, userRepository, permitAllUrlConfig);
         return jwtAuthenticationFilter;
     }
 }

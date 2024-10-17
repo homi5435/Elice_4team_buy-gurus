@@ -1,12 +1,11 @@
 package com.team04.buy_gurus.user.controller;
 
-import com.team04.buy_gurus.user.dto.SignupRequestDto;
-import com.team04.buy_gurus.user.dto.UserEditRequestDto;
-import com.team04.buy_gurus.user.dto.UserEditResponseDto;
-import com.team04.buy_gurus.user.dto.UserInfoResponseDto;
+import com.team04.buy_gurus.jwt.service.JwtService;
+import com.team04.buy_gurus.user.dto.*;
 import com.team04.buy_gurus.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -14,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -25,82 +25,70 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
+//@RequestMapping("/api")
 public class UserController {
 
     private final UserService userService;
+    private final JwtService jwtService;
 
     @PostMapping("/signup")
-    public ResponseEntity<Map<String, String>> createUser(@RequestBody SignupRequestDto request) {
+    public ResponseEntity<UserResponse<Void>> createUser(@RequestBody @Valid SignupRequestDto request) {
 
-        try {
             userService.signup(request);
-
-            Map<String, String> response = new HashMap<>();
-            response.put("message", "회원가입 성공");
-
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } catch (Exception e) {
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("message", "회원가입 실패: " + e.getMessage());
-
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-        }
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(new UserResponse<>("회원가입 성공", null));
     }
 
     @GetMapping("/userMe")
-    public ResponseEntity<UserInfoResponseDto> readUser() {
+    public ResponseEntity<UserResponse<UserInfoResponseDto>> readUser(@AuthenticationPrincipal UserDetails userDetails) {
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || !(authentication.getPrincipal() instanceof UserDetails)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        try {
-            UserInfoResponseDto response = userService.loadUserInfo(authentication);
-            return ResponseEntity.ok(response);
-        } catch (IllegalStateException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+            UserInfoResponseDto response = userService.loadUserInfo(userDetails.getUsername());
+            return ResponseEntity.ok(new UserResponse<>("유저 정보 조회 성공", response));
     }
 
     @PatchMapping("/userMe")
-    public ResponseEntity<UserEditResponseDto> updateUser(@RequestBody UserEditRequestDto request) {
+    public ResponseEntity<UserResponse<UserEditResponseDto>> updateUser(@AuthenticationPrincipal UserDetails userDetails, @RequestBody @Valid UserEditRequestDto request) {
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || !(authentication.getPrincipal() instanceof UserDetails)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        try {
-            UserEditResponseDto response = userService.editUserInfo(authentication, request);
-            return ResponseEntity.ok(response);
-        } catch (IllegalStateException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+            UserEditResponseDto response = userService.editUserInfo(userDetails.getUsername(), request);
+            return ResponseEntity.ok(new UserResponse<>("회원 정보 수정 성공", response));
     }
 
-    // 판매자 등록
+    @PatchMapping("/seller-registration")
+    public ResponseEntity<UserResponse<Void>> updateRole(@AuthenticationPrincipal UserDetails userDetails) {
 
-    // 회원 탈퇴
+        userService.sellerRegistration(userDetails.getUsername());
+        return ResponseEntity.ok(new UserResponse<>("판매자 등록 성공", null));
+    }
+
+    @PatchMapping("/reset-password")
+    public ResponseEntity<UserResponse<Void>> updatePassword(@RequestBody @Valid ResetPasswordRequestDto request) {
+
+        userService.resetPassword(request);
+        return ResponseEntity.ok(new UserResponse<>("비밀번호 재설정 성공", null));
+    }
+
     @DeleteMapping("/userMe")
-    public ResponseEntity<Void> deleteUser() {
+    public ResponseEntity<UserResponse<Void>> deleteUser(@AuthenticationPrincipal UserDetails userDetails) {
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            userService.withdrawal(userDetails.getUsername());
+            return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                    .body(new UserResponse<>("회원 탈퇴 성공", null));
+    }
 
-        if (authentication == null || !(authentication.getPrincipal() instanceof UserDetails)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+    @PostMapping("/logout")
+    public ResponseEntity<UserResponse<Void>> logout(HttpServletResponse response) {
 
-        try{
-            userService.withdrawal(authentication);
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-        } catch (IllegalStateException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        jwtService.removeAccessTokenToCookie(response);
+        jwtService.removeRefreshTokenToCookie(response);
 
+        return ResponseEntity.ok(new UserResponse<>("로그아웃 성공", null));
+    }
 
+    @PostMapping("token")
+    public ResponseEntity<UserResponse<Void>> tokenReissue(HttpServletRequest request, HttpServletResponse response) throws IOException{
+
+        jwtService.tokenReissue(request, response);
+        return ResponseEntity.ok(new UserResponse<>("토큰 재발급 성공", null));
     }
 
 }

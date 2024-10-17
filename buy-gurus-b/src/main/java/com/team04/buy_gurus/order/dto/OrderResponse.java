@@ -13,7 +13,7 @@ public class OrderResponse {
     private Long orderId;
     private String createdAt;
     private String status;
-    private String invoiceNum;
+    private ShippingInvoice invoice;
     private int shippingFee;
     private List<OrderInfoResponse> orderInfoList;
     private ShippingAddressResponse shippingAddress;
@@ -22,7 +22,7 @@ public class OrderResponse {
         this.orderId = order.getId();
         this.createdAt = order.getCreatedAt().toString();
         this.status = order.getStatus().getStatus();
-        this.invoiceNum = order.getInvoiceNum() == null ? "" : order.getInvoiceNum();
+        this.invoice = new ShippingInvoice(order);
         this.shippingFee = order.getShippingFee();
         this.orderInfoList = order.getOrderInfoList().stream()
                 .map(OrderInfoResponse::new)
@@ -31,17 +31,32 @@ public class OrderResponse {
     }
 
     @Getter
+    private static class ShippingInvoice {
+        private final String shippingCompany;
+        private final String invoiceNum;
+
+        public ShippingInvoice(Order order) {
+            this.shippingCompany = order.getShippingCompany();
+            this.invoiceNum= order.getInvoiceNum();
+        }
+    }
+
+    @Getter
     private static class OrderInfoResponse {
-        private final int productId;
-        private final int price;
+        private final Long productId;
+        private final Long price;
         private final int quantity;
+        private final String name;
         private final String imageUrl;
+        private final boolean isReviewed;
 
         public OrderInfoResponse(OrderInfo orderInfo) {
-            this.productId = -1;
+            this.productId = orderInfo.getProduct().getId();
             this.quantity = orderInfo.getQuantity();
             this.price = orderInfo.getPrice();
+            this.name = orderInfo.getProductName();
             this.imageUrl = orderInfo.getProductImageUrl();
+            this.isReviewed = orderInfo.isReviewed();
         }
     }
 

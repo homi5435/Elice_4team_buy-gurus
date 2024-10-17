@@ -7,11 +7,13 @@ import lombok.Getter;
 @Getter
 public class UserEditRequestDto {
 
-    @NotBlank
+    // private String imageUrl;
+
+    @NotBlank(message = "닉네임을 입력해주세요.")
     private String nickname;
 
     @Email
-    @NotBlank
+    @NotBlank(message = "이메일을 입력해주세요.")
     private String email;
 
 }

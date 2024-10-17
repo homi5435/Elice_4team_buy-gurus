@@ -2,6 +2,8 @@ package com.team04.buy_gurus.order.domain;
 
 import com.team04.buy_gurus.address.domain.AddressInfo;
 import com.team04.buy_gurus.order.dto.OrderUpdateRequest;
+import com.team04.buy_gurus.sellerinfo.entity.SellerInfo;
+import com.team04.buy_gurus.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
@@ -42,23 +44,29 @@ public class Order {
     private Status status = Status.PROCESSING;
 
     private String invoiceNum;
+    private String shippingCompany;
 
     @ColumnDefault("0")
     private int shippingFee;
 
     // 주문자 정보
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
     private String shippingAddress;
     private String customerName;
     private String customerPhoneNum;
 
-    // 판매자 ID
+    // 판매자 정보
+    @ManyToOne
+    @JoinColumn(name = "seller_info_id")
+    private SellerInfo sellerInfo;
+    private String sellerName;
+    private String sellerPhoneNum;
+    private String sellerCompany;
 
-    @OneToMany
-    @JoinColumn(name = "orders_id")
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderInfo> orderInfoList;
-
-    @OneToOne
-    private Refund refund;
 
     @AllArgsConstructor
     @Getter
@@ -72,8 +80,10 @@ public class Order {
         private final String status;
     }
 
-    public void setInvoiceNumber(String invoiceNumber) {
-        this.invoiceNum = invoiceNumber;
+
+    public void setInvoice(OrderUpdateRequest.Invoice request) {
+        this.invoiceNum = request.getInvoiceNum();
+        this.shippingCompany = request.getShippingCompany();
         this.setStatus(Status.SHIPPING.getStatus());
     }
 
@@ -85,6 +95,17 @@ public class Order {
         this.shippingAddress = request.getAddress();
         this.customerName = request.getName();
         this.customerPhoneNum = request.getPhoneNum();
+    }
+
+    public void setOrderInfoList(List<OrderInfo> orderInfoList) {
+        this.orderInfoList = orderInfoList;
+    }
+
+    public void setSeller(SellerInfo sellerInfo) {
+        this.sellerInfo = sellerInfo;
+        this.sellerCompany = sellerInfo.getTradeName();
+        this.sellerName = sellerInfo.getUser().getNickname();
+        this.sellerPhoneNum = sellerInfo.getBusinessPhoneNum();
     }
 
     public static Status fromString(String status) {

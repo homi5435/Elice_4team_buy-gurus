@@ -1,5 +1,6 @@
 package com.team04.buy_gurus.jwt.filter;
 
+import com.team04.buy_gurus.config.PermitAllUrlConfig;
 import com.team04.buy_gurus.jwt.service.JwtService;
 import com.team04.buy_gurus.user.entity.User;
 import com.team04.buy_gurus.user.repository.UserRepository;
@@ -24,10 +25,9 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    private static final String NO_CHECK_URL1 = "/login";
-
     private final JwtService jwtService;
     private final UserRepository userRepository;
+    private final PermitAllUrlConfig permitAllUrlConfig;
 
     private GrantedAuthoritiesMapper authoritiesMapper = new NullAuthoritiesMapper();
 
@@ -35,12 +35,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
-
-        if (request.getRequestURI().equals(NO_CHECK_URL1)) {
-            filterChain.doFilter(request, response);
-            log.info("JwtAuthenticationFilter 생략");
-            return;
-        }
 
         log.info("JwtAuthenticationFilter 동작");
         String accessToken = jwtService.extractAccessToken(request)
@@ -51,34 +45,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // accessToken = accessToken.substring(7);
             log.info("엑세스 토큰 검증 통과");
             checkAccessTokenAndAuthentication(request, response, filterChain, accessToken);
-        }
-
-        if (accessToken == null) {
-            log.info("엑세스 토큰 검증 실패");
-            jwtService.extractAccessToken(request)
-                    .ifPresent(access -> jwtService.extractEmail(access)
-                            .ifPresent(email -> userRepository.findByEmail(email)
-                                    .ifPresent(user -> {
-                                        checkRefreshTokenAndReIssueAccessToken(response, user);
-                                        return;
-                                    })));
-
+        } else {
             filterChain.doFilter(request, response);
         }
-    }
-
-    public void checkRefreshTokenAndReIssueAccessToken(HttpServletResponse response, User user) {
-
-        reIssueRefreshToken(user);
-        response.setStatus(HttpServletResponse.SC_OK);
-        String accessToken = jwtService.createAccessToken(user.getEmail());
-        jwtService.addAccessTokenToCookie(response, accessToken);
-    }
-
-    private void reIssueRefreshToken(User user) {
-        String refreshToken = jwtService.createRefreshToken();
-        user.updateRefreshToken(refreshToken);
-        userRepository.saveAndFlush(user);
     }
 
     public void checkAccessTokenAndAuthentication(HttpServletRequest request,
@@ -86,15 +55,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                                   FilterChain filterChain,
                                                   String accessToken) throws ServletException, IOException {
 
-        jwtService.extractEmail(accessToken)
-                .ifPresent(email -> userRepository.findByEmail(email)
-                        .ifPresent(this::saveAuthentication));
+        jwtService.extractUserId(accessToken)
+                .flatMap(userRepository::findById)
+                .ifPresent(this::saveAuthentication);
 
         filterChain.doFilter(request, response);
     }
 
     public void saveAuthentication(User user) {
+
         String password = user.getPassword();
+
         if (password == null) {
             password = PasswordUtil.generateRandomPassword();
         }
@@ -108,7 +79,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         Authentication authentication =
                 new UsernamePasswordAuthenticationToken(userDetailsUser, null,
                         authoritiesMapper.mapAuthorities(userDetailsUser.getAuthorities()));
-        log.info("saveAuthentication 동작");
+
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 }
