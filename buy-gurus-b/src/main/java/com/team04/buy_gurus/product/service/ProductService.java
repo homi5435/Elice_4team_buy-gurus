@@ -8,17 +8,21 @@ import com.team04.buy_gurus.product.dto.ProductResponse;
 import com.team04.buy_gurus.product.repository.ProductImageRepository;
 import com.team04.buy_gurus.product.repository.ProductRepository;
 import com.team04.buy_gurus.utils.s3_bucket.S3BucketService;
+import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class ProductService {
+    private static final Logger log = LoggerFactory.getLogger(ProductService.class);
     //TODO 유저 인포, 카테고리 ID 받아오기
     private final ProductRepository productRepository;
     private final ProductImageRepository productImageRepository;
@@ -131,7 +135,7 @@ public class ProductService {
                 .quantity(product.getQuantity())
                 .imageUrls(imageUrls)
                 .category(product.getCategory())
-                //categoryName(product.getCategory() != null ? product.getCategory().getName() : null)
+                //.category(product.getCategory() != null ? product.getCategory().getName() : null)
                 //sellerName(product.getSeller() != null ? product.getSeller().getName() : null)
                 .build();
     }
@@ -139,5 +143,29 @@ public class ProductService {
     private ProductResponse mapToResponseDto(Product product) {
         List<ProductImage> images = productImageRepository.findByProductId(product.getId());
         return mapToResponseDto(product, images);
+    }
+
+    public void createTemporaryProduct() {
+        // 임시 제품 정보
+        ProductRequest request = new ProductRequest();
+        request.setName("임시 제품");
+        request.setPrice(10000L);
+        request.setDescription("이것은 임시로 생성된 제품입니다.");
+        request.setQuantity(10L);
+        request.setCategory("임시 카테고리"); // 카테고리 ID 또는 객체로 설정 필요
+        request.setImageFiles(new MultipartFile[0]); // 이미지를 추가할 경우 여기에 파일 배열을 설정
+        // 제품 생성
+        try {
+            createProduct(request);
+            log.info("임시 제품 생성 완료");
+        } catch (Exception e) {
+            // 로그 기록
+            System.err.println("임시 제품 생성 중 오류 발생: " + e.getMessage());
+        }
+    }
+
+    @PostConstruct
+    public void init() {
+        createTemporaryProduct(); // 애플리케이션 시작 시 임시 제품 생성
     }
 }

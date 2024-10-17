@@ -8,6 +8,7 @@ import com.team04.buy_gurus.review.domain.Review;
 import com.team04.buy_gurus.review.dto.ReviewRequest;
 import com.team04.buy_gurus.review.dto.ReviewResponse;
 import com.team04.buy_gurus.review.repository.ReviewRepository;
+import com.team04.buy_gurus.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,14 +22,17 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final OrderRepository orderRepository;
     private final OrderInfoRepository orderInfoRepository;
+    private final UserRepository userRepository;
 
     @Autowired
     public ReviewService(ReviewRepository reviewRepository,
                          OrderRepository orderRepository,
-                         OrderInfoRepository orderInfoRepository){
+                         OrderInfoRepository orderInfoRepository,
+                         UserRepository userRepository){
         this.reviewRepository = reviewRepository;
         this.orderRepository = orderRepository;
         this.orderInfoRepository = orderInfoRepository;
+        this.userRepository = userRepository;
     }
 
     //리뷰 생성
@@ -49,7 +53,7 @@ public class ReviewService {
                 .createdAt(LocalDateTime.now())
                 .modifiedAt(LocalDateTime.now())
                 .productId(request.getProductId())
-                .userId(request.getUserId())
+                .user(userRepository.findById(request.getUserId()))
                 .build();
 
         Review savedReview = reviewRepository.save(review);
@@ -63,7 +67,7 @@ public class ReviewService {
     }
 
     //리뷰 수정
-    public ReviewResponse updateReview(Long id, ReviewRequest request){
+    public ReviewResponse updateReview(Long id, ReviewRequest request) {
         Review review = reviewRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("리뷰를 찾을 수 없습니다."));
 
@@ -76,7 +80,7 @@ public class ReviewService {
     }
 
     //리뷰 삭제
-    public void deleteReview(Long id){
+    public void deleteReview(Long id) {
         Review review = reviewRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("삭제할 리뷰가 존재하지 않습니다."));
         review.setIsDeleted(true);
@@ -91,8 +95,8 @@ public class ReviewService {
                 .comment(review.getComment())
                 .isDeleted(review.getIsDeleted())
                 .productId(review.getProductId())
-                .userId(review.getUserId())
-                //.userNickname(review.getUser() != null ? review.getUser().getNickname() : null)
+                .userId(review.getUser().get().getId())
+                .userNickname(review.getUser().isPresent() ? review.getUser().get().getNickname() : null)
                 .build();
     }
 }

@@ -57,10 +57,6 @@ public class Product {
 //    @JoinColumn(name = "seller_id", referencedColumnName = "id", insertable = false, updatable = false)
 //    private Seller seller;
 
-    //카테고리 아이디
-    @Column(name = "category_id")
-    private Long categoryId;
-
     //판매자 아이디
     @Column(name = "seller_id")
     private Long sellerId;

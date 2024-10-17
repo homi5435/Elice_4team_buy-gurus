@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Entity
 @Table(name = "리뷰")
@@ -35,14 +36,7 @@ public class Review {
     @Column(name = "product_id")
     private Long productId; // 상품 ID
 
-    @Column(name = "user_id")
-    private Long userId; // 사용자 ID
-
-//    public OAuth2UserInfo getUser() {
-//        return null;
-//    }
-
-//    @ManyToOne
-//    @JoinColumn(name = "user_id", insertable = false, updatable = false)
-//    private User user; // 사용자 정보
+    @ManyToOne
+    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    private Optional<User> user; // 사용자 정보
 }
