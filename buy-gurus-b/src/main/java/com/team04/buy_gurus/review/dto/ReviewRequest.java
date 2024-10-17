@@ -1,5 +1,6 @@
 package com.team04.buy_gurus.review.dto;
 
+import com.team04.buy_gurus.user.entity.User;
 import lombok.*;
 
 
