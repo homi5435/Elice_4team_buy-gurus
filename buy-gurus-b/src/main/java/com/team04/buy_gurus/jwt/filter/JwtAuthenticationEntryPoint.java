@@ -1,6 +1,5 @@
 package com.team04.buy_gurus.jwt.filter;
 
-import com.team04.buy_gurus.exception.ex_user.ex.CustomAuthenticationException;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
