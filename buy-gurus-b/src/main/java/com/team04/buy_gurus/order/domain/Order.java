@@ -116,4 +116,8 @@ public class Order {
         }
         throw new IllegalArgumentException("Unknown status: " + status);
     }
+
+    public void setShippingFee(int shippingFee) {
+        this.shippingFee = shippingFee;
+    }
 }
