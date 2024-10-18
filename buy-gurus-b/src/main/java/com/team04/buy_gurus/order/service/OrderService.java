@@ -90,6 +90,19 @@ public class OrderService {
         return userDetails.getUsername();
     }
 
+    private int sumAllPrice(List<OrderInfoRequest> orderInfoList) {
+        return orderInfoList.stream()
+                            .mapToInt((orderInfo) -> {
+                                Product product = productRepository.findById(orderInfo.getProductId()).orElse(null);
+                                if (product != null) {
+                                    return Math.toIntExact(product.getPrice() * orderInfo.getQuantity());
+                                } else {
+                                    return 0;
+                                }
+                            })
+                            .reduce(0, Integer::sum);
+    }
+
     @Transactional
     public void save(OrderRequest orderRequests, UserDetails userDetails) throws Exception {
         for (BOrderRequest orderRequest: orderRequests.getOrderRequests()) {
@@ -105,13 +118,15 @@ public class OrderService {
                     .shippingAddress(shippingInfo.getAddress())
                     .customerName(shippingInfo.getName())
                     .customerPhoneNum(shippingInfo.getPhoneNum())
-                    .shippingFee(orderRequest.getShippingFee())
                     .sellerInfo(sellerInfo)
                     .user(user)
                     .build();
             order.setSeller(sellerInfo);
 
             List<OrderInfo> orderInfoList = createOrderInfos(orderRequest.getOrderInfoList(), order);
+            int allPrice = sumAllPrice(orderRequest.getOrderInfoList());
+            int shippingFee = allPrice < 50000 ? 2500 : 0;
+            order.setShippingFee(shippingFee);
             order.setOrderInfoList(orderInfoList);
 
             orderRepository.save(order);
