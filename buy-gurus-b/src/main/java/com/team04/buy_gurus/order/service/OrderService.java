@@ -3,9 +3,10 @@ package com.team04.buy_gurus.order.service;
 import com.team04.buy_gurus.common.enums.CommonError;
 import com.team04.buy_gurus.order.domain.Order;
 import com.team04.buy_gurus.order.domain.OrderInfo;
-import com.team04.buy_gurus.order.dto.OrderPageRequest;
 import com.team04.buy_gurus.order.dto.OrderRequest;
-import com.team04.buy_gurus.order.dto.OrderRequest.OrderInfoRequest;
+import com.team04.buy_gurus.order.dto.OrderPageRequest;
+import com.team04.buy_gurus.order.dto.BOrderRequest;
+import com.team04.buy_gurus.order.dto.BOrderRequest.OrderInfoRequest;
 import com.team04.buy_gurus.order.dto.OrderUpdateRequest;
 import com.team04.buy_gurus.exception.ex_order.exception.NotExistsSellerException;
 import com.team04.buy_gurus.exception.ex_order.exception.NotOrderedException;
@@ -90,29 +91,31 @@ public class OrderService {
     }
 
     @Transactional
-    public void save(OrderRequest orderRequest, UserDetails userDetails) throws Exception {
-        OrderRequest.ShippingInfo shippingInfo = orderRequest.getShippingInfo();
+    public void save(OrderRequest orderRequests, UserDetails userDetails) throws Exception {
+        for (BOrderRequest orderRequest: orderRequests.getOrderRequests()) {
+            BOrderRequest.ShippingInfo shippingInfo = orderRequest.getShippingInfo();
 
-        SellerInfo sellerInfo = sellerInfoRepository.findById(orderRequest.getSellerId()).orElseThrow(() -> new NotExistsSellerException(CommonError.SELLER_NOT_FOUND));
+            SellerInfo sellerInfo = sellerInfoRepository.findById(orderRequest.getSellerId()).orElseThrow(() -> new NotExistsSellerException(CommonError.SELLER_NOT_FOUND));
 
-        String email = getEmailFromUserdetails(userDetails);
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new NotOrderedException(CommonError.USER_NOT_ORDERED));
+            String email = getEmailFromUserdetails(userDetails);
+            User user = userRepository.findByEmail(email).orElseThrow(() -> new NotOrderedException(CommonError.USER_NOT_ORDERED));
 
-        Order order = Order.builder()
-                .status(Order.Status.PROCESSING)
-                .shippingAddress(shippingInfo.getAddress())
-                .customerName(shippingInfo.getName())
-                .customerPhoneNum(shippingInfo.getPhoneNum())
-                .shippingFee(orderRequest.getShippingFee())
-                .sellerInfo(sellerInfo)
-                .user(user)
-                .build();
-        order.setSeller(sellerInfo);
+            Order order = Order.builder()
+                    .status(Order.Status.PROCESSING)
+                    .shippingAddress(shippingInfo.getAddress())
+                    .customerName(shippingInfo.getName())
+                    .customerPhoneNum(shippingInfo.getPhoneNum())
+                    .shippingFee(orderRequest.getShippingFee())
+                    .sellerInfo(sellerInfo)
+                    .user(user)
+                    .build();
+            order.setSeller(sellerInfo);
 
-        List<OrderInfo> orderInfoList = createOrderInfos(orderRequest.getOrderInfoList(), order);
-        order.setOrderInfoList(orderInfoList);
+            List<OrderInfo> orderInfoList = createOrderInfos(orderRequest.getOrderInfoList(), order);
+            order.setOrderInfoList(orderInfoList);
 
-        orderRepository.save(order);
+            orderRepository.save(order);
+        }
     }
 
     public Order getOrder(Long orderId, UserDetails userDetails) {
