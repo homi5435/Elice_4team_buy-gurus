@@ -1,6 +1,5 @@
 package com.team04.buy_gurus.product.dto;
 
-import com.team04.buy_gurus.category.persistence.entity.Category;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
