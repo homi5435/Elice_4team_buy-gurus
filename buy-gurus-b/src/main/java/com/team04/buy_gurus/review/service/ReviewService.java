@@ -8,6 +8,7 @@ import com.team04.buy_gurus.review.domain.Review;
 import com.team04.buy_gurus.review.dto.ReviewRequest;
 import com.team04.buy_gurus.review.dto.ReviewResponse;
 import com.team04.buy_gurus.review.repository.ReviewRepository;
+import com.team04.buy_gurus.user.entity.User;
 import com.team04.buy_gurus.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -46,6 +47,9 @@ public class ReviewService {
                 request.getProductId())
                 .orElseThrow(() -> new RuntimeException("해당 상품을 구매하고 배송이 완료된 소비자만 리뷰를 등록할 수 있습니다."));
 
+        User user = userRepository.findById(request.getUserId())
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
         Review review = Review.builder()
                 .rating(request.getRating())
                 .comment(request.getComment())
@@ -53,7 +57,7 @@ public class ReviewService {
                 .createdAt(LocalDateTime.now())
                 .modifiedAt(LocalDateTime.now())
                 .productId(request.getProductId())
-                .user(userRepository.findById(request.getUserId()))
+                .user(user)
                 .build();
 
         Review savedReview = reviewRepository.save(review);
@@ -95,8 +99,8 @@ public class ReviewService {
                 .comment(review.getComment())
                 .isDeleted(review.getIsDeleted())
                 .productId(review.getProductId())
-                .userId(review.getUser().get().getId())
-                .userNickname(review.getUser().isPresent() ? review.getUser().get().getNickname() : null)
+                .userId(review.getUser().getId())
+                .userNickname(review.getUser() != null ? review.getUser().getNickname() : null)
                 .build();
     }
 }

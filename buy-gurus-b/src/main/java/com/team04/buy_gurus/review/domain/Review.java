@@ -38,5 +38,5 @@ public class Review {
 
     @ManyToOne
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
-    private Optional<User> user; // 사용자 정보
+    private User user; // 사용자 정보
 }
