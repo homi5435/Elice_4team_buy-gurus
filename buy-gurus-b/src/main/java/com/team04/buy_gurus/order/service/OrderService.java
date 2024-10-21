@@ -18,6 +18,7 @@ import com.team04.buy_gurus.product.domain.Product;
 import com.team04.buy_gurus.product.repository.ProductRepository;
 import com.team04.buy_gurus.sellerinfo.entity.SellerInfo;
 import com.team04.buy_gurus.sellerinfo.repository.SellerInfoRepository;
+import com.team04.buy_gurus.user.CustomUserDetails;
 import com.team04.buy_gurus.user.entity.User;
 import com.team04.buy_gurus.user.repository.UserRepository;
 import lombok.NoArgsConstructor;
@@ -26,13 +27,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @NoArgsConstructor(force = true)
 @Service
@@ -43,6 +42,9 @@ public class OrderService {
     private UserRepository userRepository;
 
     private StringBuilder sb;
+
+    private final int SHIPPING_FEE = 2500;
+    private final int SHIPPING_FEE_CRITERIA = 50000;
 
     @Autowired
     public OrderService(
@@ -60,34 +62,53 @@ public class OrderService {
 
     private List<OrderInfo> createOrderInfos(List<OrderInfoRequest> orderRequest, Order order) {
         List<OrderInfo> orderInfoList = new ArrayList<>();
-        List<Long> notExistsProductList = new ArrayList<>();
-        for (OrderInfoRequest orderInfoRequest : orderRequest) {
-            try {
-                Product product = productRepository.findById(orderInfoRequest.getProductId())
-                        .orElseThrow(RuntimeException::new);
-                orderInfoList.add(new OrderInfo(orderInfoRequest, product, order));
-            } catch (Exception e) {
-                notExistsProductList.add(orderInfoRequest.getProductId());
-            }
-        }
 
-        if (!notExistsProductList.isEmpty()) {
-            sb.setLength(0);
-            sb.append("제품 ID가 등록되지 않았습니다. 다시 주문해주세요.: [");
-            for (int i = 0; i < notExistsProductList.size(); i++) {
-                sb.append(notExistsProductList.get(i));
-                if (i < notExistsProductList.size() - 1) {
-                    sb.append(", ");
-                }
-            }
-            sb.append("]");
-            throw new ProductNotFoundException(sb.toString());
+        Set<Long> productIdsFromReq = orderRequest.stream()
+                .map(OrderInfoRequest::getProductId)
+                .collect(Collectors.toSet());
+
+        List<Product> products = productRepository.findAllById(productIdsFromReq);
+
+        Set<Long> productIdsFromRepo = products.stream()
+                .map(Product::getId)
+                .collect(Collectors.toSet());
+
+        checkExistsMissingProduct(productIdsFromReq, productIdsFromRepo);
+
+        Map<Long, Product> productMap = products.stream().collect(Collectors.toMap(Product::getId, p -> p));
+
+        for (OrderInfoRequest orderInfoRequest : orderRequest) {
+            Long productId = orderInfoRequest.getProductId();
+            Product product = productMap.get(productId);
+            orderInfoList.add(new OrderInfo(orderInfoRequest, product, order));
         }
         return orderInfoList;
     }
 
-    private String getEmailFromUserdetails(UserDetails userDetails) {
-        return userDetails.getUsername();
+    private void checkExistsMissingProduct(Set<Long> fromRequest, Set<Long> fromRepository) {
+        Set<Long> missingProductIds = new HashSet<>(fromRequest);
+        missingProductIds.removeAll(fromRepository);
+
+        if (!missingProductIds.isEmpty()) {
+            throw new ProductNotFoundException(createErrorMessage(missingProductIds));
+        }
+    }
+
+    private String createErrorMessage(List<Long> productIds) {
+        sb.setLength(0);
+        sb.append("제품 ID가 등록되지 않았습니다. 다시 주문해주세요.: [");
+        for (int i = 0; i < productIds.size(); i++) {
+            sb.append(productIds.get(i));
+            if (i < productIds.size() - 1) {
+                sb.append(", ");
+            }
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+
+    private String createErrorMessage(Set<Long> productIds) {
+        return createErrorMessage(productIds.stream().toList());
     }
 
     private int sumAllPrice(List<OrderInfoRequest> orderInfoList) {
@@ -104,14 +125,13 @@ public class OrderService {
     }
 
     @Transactional
-    public void save(OrderRequest orderRequests, UserDetails userDetails) throws Exception {
+    public void save(OrderRequest orderRequests, CustomUserDetails userDetails) throws Exception {
         for (BOrderRequest orderRequest: orderRequests.getOrderRequests()) {
             BOrderRequest.ShippingInfo shippingInfo = orderRequest.getShippingInfo();
 
             SellerInfo sellerInfo = sellerInfoRepository.findById(orderRequest.getSellerId()).orElseThrow(() -> new NotExistsSellerException(CommonError.SELLER_NOT_FOUND));
 
-            String email = getEmailFromUserdetails(userDetails);
-            User user = userRepository.findByEmail(email).orElseThrow(() -> new NotOrderedException(CommonError.USER_NOT_ORDERED));
+            User user = userRepository.findById(userDetails.getUserId()).orElseThrow(() -> new NotOrderedException(CommonError.USER_NOT_ORDERED));
 
             Order order = Order.builder()
                     .status(Order.Status.PROCESSING)
@@ -125,7 +145,7 @@ public class OrderService {
 
             List<OrderInfo> orderInfoList = createOrderInfos(orderRequest.getOrderInfoList(), order);
             int allPrice = sumAllPrice(orderRequest.getOrderInfoList());
-            int shippingFee = allPrice < 50000 ? 2500 : 0;
+            int shippingFee = allPrice < SHIPPING_FEE_CRITERIA ? SHIPPING_FEE : 0;
             order.setShippingFee(shippingFee);
             order.setOrderInfoList(orderInfoList);
 
@@ -133,10 +153,8 @@ public class OrderService {
         }
     }
 
-    public Order getOrder(Long orderId, UserDetails userDetails) {
-        String email = getEmailFromUserdetails(userDetails);
-        User user = userRepository.findByEmail(email).get();
-        Optional<Order> orderOptional = orderRepository.findByOrderIdAndUserId(orderId, user.getId());
+    public Order getOrder(Long orderId, CustomUserDetails userDetails) {
+        Optional<Order> orderOptional = orderRepository.findByOrderIdAndUserId(orderId, userDetails.getUserId());
         if (orderOptional.isPresent()) {
             return orderOptional.get();
         } else {
@@ -147,19 +165,17 @@ public class OrderService {
     public Page<Order> getOrders(
             OrderPageRequest.Type typeReq,
             OrderPageRequest.Pageable pageReq,
-            UserDetails userDetails
+            CustomUserDetails userDetails
     ) {
-        String email = getEmailFromUserdetails(userDetails);
         Sort sort = Sort.by(Sort.Direction.DESC, "id");
         Pageable pageable = PageRequest.of(pageReq.getPage() - 1, pageReq.getSize(), sort);
 
         if (typeReq.getType().equals("c")) {
-            User user = userRepository.findByEmail(email).orElseThrow(() -> new NotOrderedException(CommonError.USER_NOT_ORDERED));
+            User user = userRepository.findById(userDetails.getUserId()).orElseThrow(() -> new NotOrderedException(CommonError.USER_NOT_ORDERED));
             return orderRepository.findAllByUser(user.getId(), pageable);
         } else {
-            SellerInfo sellerInfo = sellerInfoRepository.findByUseremail(email).orElseThrow(() -> new NotSellerException(CommonError.SELLER_NOT_SOLD));
-            User seller = sellerInfo.getUser();
-            return orderRepository.findAllBySellerInfo(seller.getId(), pageable);
+            SellerInfo sellerInfo = sellerInfoRepository.findByUserId(userDetails.getUserId()).orElseThrow(() -> new NotSellerException(CommonError.SELLER_NOT_SOLD));
+            return orderRepository.findAllBySellerInfo(sellerInfo.getId(), pageable);
         }
     }
 
@@ -167,19 +183,17 @@ public class OrderService {
         return orderRepository.findById(orderId).orElseThrow(() -> new RuntimeException("Order not found"));
     }
 
-    private void isValidSeller(Order order, UserDetails userDetails) throws Exception {
-        String email = getEmailFromUserdetails(userDetails);
-        sellerInfoRepository.findByUseremail(email).orElseThrow(() -> new NotSellerException(CommonError.NOT_SELLER));
-        if (!order.getSellerInfo().getUser().getEmail().equals(email)) throw new NotSoldException(CommonError.SELLER_NOT_ASSIGN_EDIT);
+    private void isValidSeller(Order order, CustomUserDetails userDetails) throws Exception {
+        sellerInfoRepository.findByUserId(userDetails.getUserId()).orElseThrow(() -> new NotSellerException(CommonError.NOT_SELLER));
+        if (!order.getSellerInfo().getUser().getId().equals(userDetails.getUserId())) throw new NotSoldException(CommonError.SELLER_NOT_ASSIGN_EDIT);
     }
 
-    private void isValidUser(Order order, UserDetails userDetails) throws Exception {
-        String email = getEmailFromUserdetails(userDetails);
-        if (!order.getUser().getEmail().equals(email)) throw new NotOrderedException(CommonError.USER_NOT_ASSIGN_EDIT);
+    private void isValidUser(Order order, CustomUserDetails userDetails) throws Exception {
+        if (!order.getUser().getId().equals(userDetails.getUserId())) throw new NotOrderedException(CommonError.USER_NOT_ASSIGN_EDIT);
     }
 
     @Transactional
-    public void updateInvoiceNumber(Long id, UserDetails userDetails, OrderUpdateRequest.Invoice request) throws Exception {
+    public void updateInvoiceNumber(Long id, CustomUserDetails userDetails, OrderUpdateRequest.Invoice request) throws Exception {
         Order order = findOrderById(id);
 
         isValidSeller(order, userDetails);
@@ -189,7 +203,7 @@ public class OrderService {
     }
 
     @Transactional
-    public void updateStatus(Long id, UserDetails userDetails, OrderUpdateRequest.Status request) throws Exception {
+    public void updateStatus(Long id, CustomUserDetails userDetails, OrderUpdateRequest.Status request) throws Exception {
         Order order = findOrderById(id);
 
         isValidSeller(order, userDetails);
@@ -198,7 +212,7 @@ public class OrderService {
     }
 
     @Transactional
-    public void updateAddress(Long id, UserDetails userDetails, OrderUpdateRequest.Address request) throws Exception {
+    public void updateAddress(Long id, CustomUserDetails userDetails, OrderUpdateRequest.Address request) throws Exception {
         Order order = findOrderById(id);
 
         isValidUser(order, userDetails);
@@ -207,7 +221,7 @@ public class OrderService {
     }
 
     @Transactional
-    public void delete(Long id, UserDetails userDetails) throws Exception {
+    public void delete(Long id, CustomUserDetails userDetails) throws Exception {
         Order order = findOrderById(id);
 
         isValidUser(order, userDetails);
