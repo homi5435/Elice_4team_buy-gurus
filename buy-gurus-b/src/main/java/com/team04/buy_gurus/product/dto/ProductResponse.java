@@ -1,5 +1,6 @@
 package com.team04.buy_gurus.product.dto;
 
+import com.team04.buy_gurus.category.domain.Category;
 import com.team04.buy_gurus.product.domain.Product;
 
 import com.team04.buy_gurus.product.domain.ProductImage;
@@ -21,6 +22,8 @@ public class ProductResponse {
     private Long quantity;
     private List<String> imageUrls = new ArrayList<>();
     private String category;
+    private String tradeName;
+    private Long sellerUserId;
 
     public ProductResponse(Product product, List<ProductImage> productImages) {
         this.id = product.getId();
@@ -28,8 +31,9 @@ public class ProductResponse {
         this.price = product.getPrice();
         this.description = product.getDescription();
         this.quantity = product.getQuantity();
-        this.category = product.getCategory();
-//        this.category = product.getCategory() != null ? product.getCategory().getName() : null; // 카테고리 이름 처리
+        this.tradeName = product.getSeller() != null ? product.getSeller().getTradeName() : null;
+        this.sellerUserId = product.getSeller() != null ? product.getSeller().getUser().getId() : null;
+        this.category = product.getCategory() != null ? product.getCategory().getName() : null; // 카테고리 이름 처리
         this.imageUrls = new ArrayList<>(); // 빈 리스트 초기화
 
         for (ProductImage productImage : productImages) {

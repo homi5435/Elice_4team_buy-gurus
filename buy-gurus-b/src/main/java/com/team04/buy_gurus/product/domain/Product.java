@@ -1,5 +1,7 @@
 package com.team04.buy_gurus.product.domain;
 
+import com.team04.buy_gurus.category.domain.Category;
+import com.team04.buy_gurus.sellerinfo.entity.SellerInfo;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -45,19 +47,11 @@ public class Product {
     @Column(nullable = false)
     private Long quantity;
 
-    @Column(nullable = false)
-    private String category;
+    @ManyToOne
+    @JoinColumn(name = "category_id", referencedColumnName = "id", insertable = false, updatable = false)
+    private Category category;
 
-    //TODO 카테고리, 판매자 정보 가져오기
-//    @ManyToOne
-//    @JoinColumn(name = "category_id", referencedColumnName = "id", insertable = false, updatable = false)
-//    private Category category;
-//
-//    @ManyToOne
-//    @JoinColumn(name = "seller_id", referencedColumnName = "id", insertable = false, updatable = false)
-//    private Seller seller;
-
-    //판매자 아이디
-    @Column(name = "seller_id")
-    private Long sellerId;
+    @ManyToOne
+    @JoinColumn(name = "seller_id", referencedColumnName = "id", insertable = false, updatable = false)
+    private SellerInfo seller;
 }

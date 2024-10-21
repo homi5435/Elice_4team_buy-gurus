@@ -23,6 +23,16 @@ public class ProductController {
         return ResponseEntity.ok(responseDtoList);
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<Page<ProductResponse>> searchProducts(
+            @RequestParam(required = false) Long parentId,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) String name,
+            Pageable pageable) {
+        Page<ProductResponse> responseDtoList = productService.searchProducts(parentId, categoryId, name, pageable);
+        return ResponseEntity.ok(responseDtoList);
+    }
+
     @PostMapping
     public ResponseEntity<ProductResponse> createProduct(
             @RequestParam("name") String name,
