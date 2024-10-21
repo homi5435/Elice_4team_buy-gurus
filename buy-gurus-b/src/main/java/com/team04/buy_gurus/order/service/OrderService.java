@@ -43,6 +43,9 @@ public class OrderService {
 
     private StringBuilder sb;
 
+    private final int SHIPPING_FEE = 2500;
+    private final int SHIPPING_FEE_CRITERIA = 50000;
+
     @Autowired
     public OrderService(
             OrderRepository orderRepository,
@@ -142,7 +145,7 @@ public class OrderService {
 
             List<OrderInfo> orderInfoList = createOrderInfos(orderRequest.getOrderInfoList(), order);
             int allPrice = sumAllPrice(orderRequest.getOrderInfoList());
-            int shippingFee = allPrice < 50000 ? 2500 : 0;
+            int shippingFee = allPrice < SHIPPING_FEE_CRITERIA ? SHIPPING_FEE : 0;
             order.setShippingFee(shippingFee);
             order.setOrderInfoList(orderInfoList);
 
