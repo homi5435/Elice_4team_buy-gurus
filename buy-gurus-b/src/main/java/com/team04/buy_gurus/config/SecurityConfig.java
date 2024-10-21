@@ -2,6 +2,7 @@ package com.team04.buy_gurus.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.team04.buy_gurus.jwt.filter.CustomJsonUsernamePasswordAuthenticationFilter;
+import com.team04.buy_gurus.jwt.filter.JwtAccessDeniedHandler;
 import com.team04.buy_gurus.jwt.filter.JwtAuthenticationEntryPoint;
 import com.team04.buy_gurus.jwt.filter.JwtAuthenticationFilter;
 import com.team04.buy_gurus.jwt.handler.LoginFailureHandler;
@@ -46,6 +47,7 @@ public class SecurityConfig {
     private final CustomOAuth2UserService customOAuth2UserService;
     private final PermitAllUrlConfig permitAllUrlConfig;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -61,6 +63,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(permitAllUrlConfig.getPermitAllUrls().toArray(String[]::new)).permitAll()
+                        //.requestMatchers("/api/category").hasAuthority("ROLE_ADMIN")
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
@@ -71,6 +74,7 @@ public class SecurityConfig {
                 .addFilterAfter(customJsonUsernamePasswordAuthenticationFilter(), LogoutFilter.class)
                 .addFilterBefore(jwtAuthenticationProcessingFilter(), CustomJsonUsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(exception -> exception
+                        .accessDeniedHandler(jwtAccessDeniedHandler)
                         .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                 );
 

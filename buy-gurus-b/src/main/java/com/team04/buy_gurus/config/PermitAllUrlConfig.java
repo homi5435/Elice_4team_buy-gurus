@@ -15,12 +15,12 @@ public class PermitAllUrlConfig {
                 "/js/**",
                 "/favicon.ico",
                 "/h2-console",
-                "/login",
-                "/signup",
+                "/api/login",
+                "/api/signup",
                 "/oauth2/authorization/**",
                 "/api/auth/**",
-                "/reset-password",
-                "/token"
+                "/api/reset-password",
+                "/api/token"
         );
     }
 }

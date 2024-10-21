@@ -53,7 +53,7 @@ public class ReviewService {
                 .createdAt(LocalDateTime.now())
                 .modifiedAt(LocalDateTime.now())
                 .productId(request.getProductId())
-                .user(userRepository.findById(request.getUserId()))
+                .user(userRepository.findById(request.getUserId()).orElse(null))
                 .build();
 
         Review savedReview = reviewRepository.save(review);
@@ -95,8 +95,8 @@ public class ReviewService {
                 .comment(review.getComment())
                 .isDeleted(review.getIsDeleted())
                 .productId(review.getProductId())
-                .userId(review.getUser().get().getId())
-                .userNickname(review.getUser().isPresent() ? review.getUser().get().getNickname() : null)
+                .userId(review.getUser().getId())
+                .userNickname(review.getUser().getNickname())
                 .build();
     }
 }

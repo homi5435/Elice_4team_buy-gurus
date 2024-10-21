@@ -34,16 +34,18 @@ public class JwtService {
     private static final String REFRESH_TOKEN_SUBJECT = "RefreshToken";
     private static final String REFRESH_TOKEN_COOKIE = "refreshToken";
     private static final String USER_ID_CLAIM = "user_id";
+    private static final String ROLE_CLAIM = "role";
     private static final String BEARER = "Bearer ";
 
     private final UserRepository userRepository;
 
-    public String createAccessToken(Long userId) {
+    public String createAccessToken(Long userId, String role) {
         Date now = new Date();
         return JWT.create()
                 .withSubject(ACCESS_TOKEN_SUBJECT)
                 .withExpiresAt(new Date(now.getTime() + jwtProperties.getAccessTokenExpiration()))
                 .withClaim(USER_ID_CLAIM, userId)
+                .withClaim(ROLE_CLAIM, role)
                 .sign(Algorithm.HMAC512(jwtProperties.getSecretKey()));
     }
 
@@ -86,6 +88,18 @@ public class JwtService {
                     .verify(accessToken)
                     .getClaim(USER_ID_CLAIM)
                     .asLong());
+        } catch (Exception e) {
+            return Optional.empty();
+        }
+    }
+
+    public Optional<String> extractRole(String accessToken) {
+        try {
+            return Optional.ofNullable(JWT.require(Algorithm.HMAC512(jwtProperties.getSecretKey()))
+                    .build()
+                    .verify(accessToken)
+                    .getClaim(ROLE_CLAIM)
+                    .asString());
         } catch (Exception e) {
             return Optional.empty();
         }
@@ -162,7 +176,7 @@ public class JwtService {
             User user = userRepository.findByRefreshToken(refreshToken)
                     .orElseThrow(UserNotFoundException::new);
 
-            String newAccessToken = createAccessToken(user.getId());
+            String newAccessToken = createAccessToken(user.getId(), user.getRole().getValue());
             String newRefreshToken = createRefreshToken();
 
             user.updateRefreshToken(newRefreshToken);

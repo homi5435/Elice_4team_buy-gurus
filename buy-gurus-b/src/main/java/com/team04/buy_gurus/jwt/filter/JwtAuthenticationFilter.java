@@ -2,6 +2,7 @@ package com.team04.buy_gurus.jwt.filter;
 
 import com.team04.buy_gurus.config.PermitAllUrlConfig;
 import com.team04.buy_gurus.jwt.service.JwtService;
+import com.team04.buy_gurus.user.CustomUserDetails;
 import com.team04.buy_gurus.user.entity.User;
 import com.team04.buy_gurus.user.repository.UserRepository;
 import com.team04.buy_gurus.util.PasswordUtil;
@@ -44,41 +45,26 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (accessToken != null) {
             // accessToken = accessToken.substring(7);
             log.info("엑세스 토큰 검증 통과");
-            checkAccessTokenAndAuthentication(request, response, filterChain, accessToken);
-        } else {
-            filterChain.doFilter(request, response);
+            checkAccessTokenAndAuthentication(accessToken);
         }
-    }
-
-    public void checkAccessTokenAndAuthentication(HttpServletRequest request,
-                                                  HttpServletResponse response,
-                                                  FilterChain filterChain,
-                                                  String accessToken) throws ServletException, IOException {
-
-        jwtService.extractUserId(accessToken)
-                .flatMap(userRepository::findById)
-                .ifPresent(this::saveAuthentication);
 
         filterChain.doFilter(request, response);
     }
 
-    public void saveAuthentication(User user) {
+    public void checkAccessTokenAndAuthentication(String accessToken) {
 
-        String password = user.getPassword();
+        Long userId = jwtService.extractUserId(accessToken).orElse(null);
+        String role = jwtService.extractRole(accessToken).orElse(null);
+        saveAuthentication(userId, role);
+    }
 
-        if (password == null) {
-            password = PasswordUtil.generateRandomPassword();
-        }
+    public void saveAuthentication(Long userId, String role) {
 
-        UserDetails userDetailsUser = org.springframework.security.core.userdetails.User.builder()
-                .username(user.getEmail())
-                .password(password)
-                .roles(user.getRole().name())
-                .build();
+        CustomUserDetails customUserDetails = new CustomUserDetails(userId, role);
 
         Authentication authentication =
-                new UsernamePasswordAuthenticationToken(userDetailsUser, null,
-                        authoritiesMapper.mapAuthorities(userDetailsUser.getAuthorities()));
+                new UsernamePasswordAuthenticationToken(customUserDetails, null,
+                        authoritiesMapper.mapAuthorities(customUserDetails.getAuthorities()));
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
