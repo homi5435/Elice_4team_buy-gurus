@@ -17,6 +17,7 @@ public class OrderResponse {
     private int shippingFee;
     private List<OrderInfoResponse> orderInfoList;
     private ShippingAddressResponse shippingAddress;
+    private SellerInfo sellerInfo;
 
     public OrderResponse(Order order) {
         this.orderId = order.getId();
@@ -28,6 +29,7 @@ public class OrderResponse {
                 .map(OrderInfoResponse::new)
                 .collect(Collectors.toList());
         this.shippingAddress = new ShippingAddressResponse(order);
+        this.sellerInfo = new SellerInfo(order);
     }
 
     @Getter
@@ -70,6 +72,21 @@ public class OrderResponse {
             this.address = order.getShippingAddress();
             this.phoneNum = order.getCustomerPhoneNum();
             this.name = order.getCustomerName();
+        }
+    }
+
+    @Getter
+    private static class SellerInfo {
+        private final Long id;
+        private final String name;
+        private final String phoneNum;
+        private final String company;
+
+        public SellerInfo(Order order) {
+            this.id = order.getSellerInfo().getId();
+            this.name = order.getSellerName();
+            this.phoneNum = order.getSellerPhoneNum();
+            this.company = order.getSellerCompany();
         }
     }
 }

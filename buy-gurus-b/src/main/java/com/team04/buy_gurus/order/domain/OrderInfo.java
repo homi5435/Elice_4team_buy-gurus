@@ -1,6 +1,6 @@
 package com.team04.buy_gurus.order.domain;
 
-import com.team04.buy_gurus.order.dto.OrderRequest;
+import com.team04.buy_gurus.order.dto.BOrderRequest;
 import com.team04.buy_gurus.product.domain.Product;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -39,7 +39,7 @@ public class OrderInfo {
     @JoinColumn(name = "orders_id")
     private Order order;
 
-    public OrderInfo(OrderRequest.OrderInfoRequest orderInfoRequest, Product product, Order order) {
+    public OrderInfo(BOrderRequest.OrderInfoRequest orderInfoRequest, Product product, Order order) {
         this.quantity = orderInfoRequest.getQuantity();
         this.productName = product.getName();
         this.product = product;
