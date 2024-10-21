@@ -16,6 +16,6 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("SELECT o FROM Order o JOIN o.sellerInfo si WHERE si.id = :sellerId")
     Page<Order> findAllBySellerInfo(@Param("sellerId") Long sellerId, Pageable pageable);
 
-    @Query("SELECT o FROM Order o JOIN o.user u JOIN o.sellerInfo s WHERE o.id = :orderId AND (u.id = :userId OR s.id = :userId)")
+    @Query("SELECT o FROM Order o JOIN o.user u JOIN o.sellerInfo s WHERE o.id = :orderId AND (u.id = :userId OR s.user.id = :userId)")
     Optional<Order> findByOrderIdAndUserId(@Param("orderId") Long orderId, @Param("userId") Long userId);
 }
