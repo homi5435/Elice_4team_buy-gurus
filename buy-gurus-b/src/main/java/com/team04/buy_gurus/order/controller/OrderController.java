@@ -37,47 +37,47 @@ public class OrderController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CommonResponseDTO<OrderResponse>> getOrder(@PathVariable("id") Long id, @AuthenticationPrincipal UserDetails userDetails) {
-        Order order = orderService.getOrder(id, userDetails);
+    public ResponseEntity<CommonResponseDTO<OrderResponse>> getOrder(@PathVariable("id") Long orderId, @AuthenticationPrincipal UserDetails userDetails) {
+        Order order = orderService.getOrder(orderId, userDetails);
         return ResponseEntity.ok(new CommonResponseDTO<>(CommonSuccess.ORDER_FOUND, new OrderResponse(order)));
     }
 
     @PatchMapping("/{id}/invoice")
     public ResponseEntity<CommonResponseDTO<String>> updateInvoiceNumber(
-            @PathVariable("id") Long id,
+            @PathVariable("id") Long orderId,
             @Valid @RequestBody OrderUpdateRequest.Invoice request,
             @AuthenticationPrincipal UserDetails userDetails
     ) throws Exception {
-        orderService.updateInvoiceNumber(id, userDetails, request);
+        orderService.updateInvoiceNumber(orderId, userDetails, request);
         return ResponseEntity.ok(new CommonResponseDTO<>(CommonSuccess.ORDER_UPDATE_SUCCESS));
     }
 
     @PatchMapping("/{id}/status")
     public ResponseEntity<?> updateStatus(
-            @PathVariable("id") Long id,
+            @PathVariable("id") Long orderId,
             @Valid @RequestBody OrderUpdateRequest.Status request,
             @AuthenticationPrincipal UserDetails userDetails
     ) throws Exception {
-        orderService.updateStatus(id, userDetails, request);
+        orderService.updateStatus(orderId, userDetails, request);
         return ResponseEntity.ok(new CommonResponseDTO<>(CommonSuccess.ORDER_UPDATE_SUCCESS));
     }
 
     @PatchMapping("/{id}/address")
     public ResponseEntity<?> updateAddress(
-            @PathVariable("id") Long id,
+            @PathVariable("id") Long orderId,
             @Valid @RequestBody OrderUpdateRequest.Address request,
             @AuthenticationPrincipal UserDetails userDetails
     ) throws Exception {
-        orderService.updateAddress(id, userDetails, request);
+        orderService.updateAddress(orderId, userDetails, request);
         return ResponseEntity.ok(new CommonResponseDTO<>(CommonSuccess.ORDER_UPDATE_SUCCESS));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteOrder(
-            @PathVariable("id") Long id,
+            @PathVariable("id") Long orderId,
             @AuthenticationPrincipal UserDetails userDetails
     ) throws Exception {
-        orderService.delete(id, userDetails);
+        orderService.delete(orderId, userDetails);
         return ResponseEntity.ok(new CommonResponseDTO<>(CommonSuccess.ORDER_DELETE_SUCCESS));
     }
 }
