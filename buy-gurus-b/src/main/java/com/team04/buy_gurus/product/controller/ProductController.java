@@ -8,8 +8,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Optional;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/product")
@@ -25,7 +24,16 @@ public class ProductController {
     }
 
     @PostMapping
-    public ResponseEntity<ProductResponse> createProduct(@RequestBody ProductRequest request){
+    public ResponseEntity<ProductResponse> createProduct(
+            @RequestParam("name") String name,
+            @RequestParam("price") Long price,
+            @RequestParam("description") String description,
+            @RequestParam("quantity") Long quantity,
+            @RequestParam("category") String category,
+            @RequestParam("imageFiles") MultipartFile[] imageFiles
+    )
+    {
+        ProductRequest request = new ProductRequest(name, price, description, quantity, imageFiles, category);
         ProductResponse response = productService.createProduct(request);
         return ResponseEntity.ok(response);
     }
@@ -37,7 +45,16 @@ public class ProductController {
     }
 
     @PatchMapping("/{productId}")
-    public ResponseEntity<ProductResponse> updateProduct(@PathVariable Long id, @RequestBody ProductRequest request){
+    public ResponseEntity<ProductResponse> updateProduct(
+            @PathVariable Long id,
+            @RequestParam("name") String name,
+            @RequestParam("price") Long price,
+            @RequestParam("description") String description,
+            @RequestParam("quantity") Long quantity,
+            @RequestParam("category") String category,
+            @RequestParam("imageFiles") MultipartFile[] imageFiles
+    ){
+        ProductRequest request = new ProductRequest(name, price, description, quantity, imageFiles, category);
         ProductResponse response = productService.updateProduct(id, request);
         return ResponseEntity.ok(response);
     }
