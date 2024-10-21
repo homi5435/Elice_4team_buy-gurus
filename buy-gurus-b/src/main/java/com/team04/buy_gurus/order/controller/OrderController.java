@@ -5,12 +5,12 @@ import com.team04.buy_gurus.common.enums.CommonSuccess;
 import com.team04.buy_gurus.order.domain.Order;
 import com.team04.buy_gurus.order.dto.*;
 import com.team04.buy_gurus.order.service.OrderService;
+import com.team04.buy_gurus.user.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -21,7 +21,7 @@ public class OrderController {
 
     // 주문 완료 시 저장
     @PostMapping
-    public ResponseEntity<CommonResponseDTO<String>> saveOrder(@Valid @RequestBody OrderRequest orderRequest, @AuthenticationPrincipal UserDetails userDetails) throws Exception {
+    public ResponseEntity<CommonResponseDTO<String>> saveOrder(@Valid @RequestBody OrderRequest orderRequest, @AuthenticationPrincipal CustomUserDetails userDetails) throws Exception {
         orderService.save(orderRequest, userDetails);
         return ResponseEntity.ok(new CommonResponseDTO<>(CommonSuccess.ORDER_SAVE_SUCCESS));
     }
@@ -30,14 +30,14 @@ public class OrderController {
     public ResponseEntity<CommonResponseDTO<OrderListResponse>> getAllOrder(
             @Valid OrderPageRequest.Type type,
             OrderPageRequest.Pageable page,
-            @AuthenticationPrincipal UserDetails userDetails
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         Page<Order> paged = orderService.getOrders(type, page, userDetails);
         return ResponseEntity.ok(new CommonResponseDTO<>(CommonSuccess.ORDER_FOUND, new OrderListResponse(paged)));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CommonResponseDTO<OrderResponse>> getOrder(@PathVariable("id") Long orderId, @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<CommonResponseDTO<OrderResponse>> getOrder(@PathVariable("id") Long orderId, @AuthenticationPrincipal CustomUserDetails userDetails) {
         Order order = orderService.getOrder(orderId, userDetails);
         return ResponseEntity.ok(new CommonResponseDTO<>(CommonSuccess.ORDER_FOUND, new OrderResponse(order)));
     }
@@ -46,7 +46,7 @@ public class OrderController {
     public ResponseEntity<CommonResponseDTO<String>> updateInvoiceNumber(
             @PathVariable("id") Long orderId,
             @Valid @RequestBody OrderUpdateRequest.Invoice request,
-            @AuthenticationPrincipal UserDetails userDetails
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) throws Exception {
         orderService.updateInvoiceNumber(orderId, userDetails, request);
         return ResponseEntity.ok(new CommonResponseDTO<>(CommonSuccess.ORDER_UPDATE_SUCCESS));
@@ -56,7 +56,7 @@ public class OrderController {
     public ResponseEntity<?> updateStatus(
             @PathVariable("id") Long orderId,
             @Valid @RequestBody OrderUpdateRequest.Status request,
-            @AuthenticationPrincipal UserDetails userDetails
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) throws Exception {
         orderService.updateStatus(orderId, userDetails, request);
         return ResponseEntity.ok(new CommonResponseDTO<>(CommonSuccess.ORDER_UPDATE_SUCCESS));
@@ -66,7 +66,7 @@ public class OrderController {
     public ResponseEntity<?> updateAddress(
             @PathVariable("id") Long orderId,
             @Valid @RequestBody OrderUpdateRequest.Address request,
-            @AuthenticationPrincipal UserDetails userDetails
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) throws Exception {
         orderService.updateAddress(orderId, userDetails, request);
         return ResponseEntity.ok(new CommonResponseDTO<>(CommonSuccess.ORDER_UPDATE_SUCCESS));
@@ -75,7 +75,7 @@ public class OrderController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteOrder(
             @PathVariable("id") Long orderId,
-            @AuthenticationPrincipal UserDetails userDetails
+            @AuthenticationPrincipal CustomUserDetails userDetails
     ) throws Exception {
         orderService.delete(orderId, userDetails);
         return ResponseEntity.ok(new CommonResponseDTO<>(CommonSuccess.ORDER_DELETE_SUCCESS));
