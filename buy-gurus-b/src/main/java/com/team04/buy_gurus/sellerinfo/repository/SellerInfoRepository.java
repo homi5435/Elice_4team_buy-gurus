@@ -10,6 +10,6 @@ import java.util.Optional;
 
 @Repository
 public interface SellerInfoRepository extends JpaRepository<SellerInfo, Long> {
-    @Query("SELECT si FROM SellerInfo si JOIN si.user u WHERE u.email=:email")
-    Optional<SellerInfo> findByUseremail(@Param("email") String email);
+    @Query("Select si FROM SellerInfo si WHERE si.user.id=:userId")
+    Optional<SellerInfo> findByUserId(@Param("id") Long userId);
 }
