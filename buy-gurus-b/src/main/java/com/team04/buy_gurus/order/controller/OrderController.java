@@ -32,7 +32,6 @@ public class OrderController {
             OrderPageRequest.Pageable page,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        System.out.println(userDetails);
         Page<Order> paged = orderService.getOrders(type, page, userDetails);
         return ResponseEntity.ok(new CommonResponseDTO<>(CommonSuccess.ORDER_FOUND, new OrderListResponse(paged)));
     }
