@@ -92,14 +92,14 @@ public class UserService {
         );
 
         // 간단한 중복 Seller 가입 체크
-        /*sellerInfoRepository.findByUseremail(email).ifPresentOrElse(si -> {}, () -> {
+        sellerInfoRepository.findByUserId(userId).ifPresentOrElse(si -> {}, () -> {
             User sellerUser = user.get();
             SellerInfo sellerInfo = SellerInfo.builder()
                     .user(sellerUser)
                     .build();
             sellerInfoRepository.save(sellerInfo);
             sellerUser.updateSellerInfo(sellerInfo);
-        });*/
+        });
 
 
     }
