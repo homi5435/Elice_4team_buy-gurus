@@ -40,7 +40,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     }
 
     private void loginSuccess(HttpServletResponse response, CustomOAuth2User oAuth2User) throws IOException {
-        String accessToken = jwtService.createAccessToken(oAuth2User.getUserId());
+        String accessToken = jwtService.createAccessToken(oAuth2User.getUserId(), oAuth2User.getRole().getValue());
         String refreshToken = jwtService.createRefreshToken();
 
         response.setStatus(HttpServletResponse.SC_OK);

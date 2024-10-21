@@ -1,6 +1,7 @@
 package com.team04.buy_gurus.jwt.service;
 
 import com.team04.buy_gurus.exception.ex_user.ex.UserNotFoundException;
+import com.team04.buy_gurus.user.CustomUserDetails;
 import com.team04.buy_gurus.user.entity.User;
 import com.team04.buy_gurus.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -26,4 +27,5 @@ public class LoginService implements UserDetailsService {
                 .roles(user.getRole().name())
                 .build();
     }
+
 }

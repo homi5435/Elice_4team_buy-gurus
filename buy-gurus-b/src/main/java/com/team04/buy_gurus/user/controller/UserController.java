@@ -1,6 +1,7 @@
 package com.team04.buy_gurus.user.controller;
 
 import com.team04.buy_gurus.jwt.service.JwtService;
+import com.team04.buy_gurus.user.CustomUserDetails;
 import com.team04.buy_gurus.user.dto.*;
 import com.team04.buy_gurus.user.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,7 +26,7 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-//@RequestMapping("/api")
+@RequestMapping("/api")
 public class UserController {
 
     private final UserService userService;
@@ -40,23 +41,23 @@ public class UserController {
     }
 
     @GetMapping("/userMe")
-    public ResponseEntity<UserResponse<UserInfoResponseDto>> readUser(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<UserResponse<UserInfoResponseDto>> readUser(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
-            UserInfoResponseDto response = userService.loadUserInfo(userDetails.getUsername());
+            UserInfoResponseDto response = userService.loadUserInfo(customUserDetails.getUserId());
             return ResponseEntity.ok(new UserResponse<>("유저 정보 조회 성공", response));
     }
 
     @PatchMapping("/userMe")
-    public ResponseEntity<UserResponse<UserEditResponseDto>> updateUser(@AuthenticationPrincipal UserDetails userDetails, @RequestBody @Valid UserEditRequestDto request) {
+    public ResponseEntity<UserResponse<UserEditResponseDto>> updateUser(@AuthenticationPrincipal CustomUserDetails customUserDetails, @RequestBody @Valid UserEditRequestDto request) {
 
-            UserEditResponseDto response = userService.editUserInfo(userDetails.getUsername(), request);
+            UserEditResponseDto response = userService.editUserInfo(customUserDetails.getUserId(), request);
             return ResponseEntity.ok(new UserResponse<>("회원 정보 수정 성공", response));
     }
 
     @PatchMapping("/seller-registration")
-    public ResponseEntity<UserResponse<Void>> updateRole(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<UserResponse<Void>> updateRole(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
-        userService.sellerRegistration(userDetails.getUsername());
+        userService.sellerRegistration(customUserDetails.getUserId());
         return ResponseEntity.ok(new UserResponse<>("판매자 등록 성공", null));
     }
 
@@ -68,9 +69,9 @@ public class UserController {
     }
 
     @DeleteMapping("/userMe")
-    public ResponseEntity<UserResponse<Void>> deleteUser(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<UserResponse<Void>> deleteUser(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
 
-            userService.withdrawal(userDetails.getUsername());
+            userService.withdrawal(customUserDetails.getUserId());
             return ResponseEntity.status(HttpStatus.NO_CONTENT)
                     .body(new UserResponse<>("회원 탈퇴 성공", null));
     }
@@ -84,7 +85,7 @@ public class UserController {
         return ResponseEntity.ok(new UserResponse<>("로그아웃 성공", null));
     }
 
-    @PostMapping("token")
+    @PostMapping("/token")
     public ResponseEntity<UserResponse<Void>> tokenReissue(HttpServletRequest request, HttpServletResponse response) throws IOException{
 
         jwtService.tokenReissue(request, response);

@@ -1,6 +1,9 @@
 package com.team04.buy_gurus.jwt.handler;
 
+import com.team04.buy_gurus.exception.ex_user.ex.UserNotFoundException;
 import com.team04.buy_gurus.jwt.service.JwtService;
+import com.team04.buy_gurus.user.CustomUserDetails;
+import com.team04.buy_gurus.user.entity.User;
 import com.team04.buy_gurus.user.repository.UserRepository;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,27 +30,23 @@ public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
         log.info("일반 로그인 성공 핸들러 동작");
         String email = extractUsername(authentication);
-        Long userId = userRepository.findByEmail(email)
-                .map(user -> user.getId())
-                .orElseThrow(() -> {
-                    throw new IllegalArgumentException("회원을 찾을 수 없습니다.");
-                });
-        String accessToken = jwtService.createAccessToken(userId);
+        User user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
+
+        String accessToken = jwtService.createAccessToken(user.getId(), user.getRole().getValue());
         String refreshToken = jwtService.createRefreshToken();
 
         response.setStatus(HttpServletResponse.SC_OK);
         jwtService.addAccessTokenToCookie(response, accessToken);
         jwtService.addRefreshTokenToCookie(response, refreshToken);
 
-        userRepository.findByEmail(email)
-                .ifPresent(user -> {
-                    user.updateRefreshToken(refreshToken);
-                    userRepository.saveAndFlush(user);
-                });
+
+        user.updateRefreshToken(refreshToken);
+        userRepository.saveAndFlush(user);
     }
 
-        private String extractUsername(Authentication authentication) {
+    private String extractUsername(Authentication authentication) {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         return userDetails.getUsername();
     }
 }
+

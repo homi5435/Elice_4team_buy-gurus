@@ -52,9 +52,9 @@ public class UserService {
                 .build());
     }
 
-    public UserInfoResponseDto loadUserInfo(String email) {
+    public UserInfoResponseDto loadUserInfo(Long userId) {
 
-        return userRepository.findByEmail(email)
+        return userRepository.findById(userId)
                 .map(user -> new UserInfoResponseDto(
                         // user.getImageUrl(),
                         user.getNickname(),
@@ -63,9 +63,9 @@ public class UserService {
                 .orElseThrow(UserNotFoundException::new);
     }
 
-    public UserEditResponseDto editUserInfo(String email, UserEditRequestDto request) {
+    public UserEditResponseDto editUserInfo(Long userId, UserEditRequestDto request) {
 
-        return userRepository.findByEmail(email)
+        return userRepository.findById(userId)
                 .map(user -> {
                     if (userRepository.findByNickname(request.getNickname()).isEmpty()) {
                         user.updateNickname(request.getNickname());
@@ -80,10 +80,10 @@ public class UserService {
                 .orElseThrow(UserNotFoundException::new);
     }
 
-    public void sellerRegistration(String email) {
+    public void sellerRegistration(Long userId) {
         // TODO
         // 중복 Seller 가입 체크를 깔끔하게 작성!
-        Optional<User> user = userRepository.findByEmail(email);
+        Optional<User> user = userRepository.findById(userId);
 
         user.ifPresentOrElse(User::updateRole,
                 () -> {
@@ -92,14 +92,14 @@ public class UserService {
         );
 
         // 간단한 중복 Seller 가입 체크
-        sellerInfoRepository.findByUseremail(email).ifPresentOrElse(si -> {}, () -> {
+        /*sellerInfoRepository.findByUseremail(email).ifPresentOrElse(si -> {}, () -> {
             User sellerUser = user.get();
             SellerInfo sellerInfo = SellerInfo.builder()
                     .user(sellerUser)
                     .build();
             sellerInfoRepository.save(sellerInfo);
             sellerUser.updateSellerInfo(sellerInfo);
-        });
+        });*/
 
 
     }
@@ -118,9 +118,9 @@ public class UserService {
                         });
     }
 
-    public void withdrawal(String email) {
+    public void withdrawal(Long userId) {
 
-        userRepository.findByEmail(email)
+        userRepository.findById(userId)
                 .ifPresentOrElse(userRepository::delete,
                         () -> {
                             throw new UserNotFoundException();
