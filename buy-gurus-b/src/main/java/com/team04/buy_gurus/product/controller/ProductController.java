@@ -45,7 +45,16 @@ public class ProductController {
     }
 
     @PatchMapping("/{productId}")
-    public ResponseEntity<ProductResponse> updateProduct(@PathVariable Long id, @RequestBody ProductRequest request){
+    public ResponseEntity<ProductResponse> updateProduct(
+            @PathVariable Long id,
+            @RequestParam("name") String name,
+            @RequestParam("price") Long price,
+            @RequestParam("description") String description,
+            @RequestParam("quantity") Long quantity,
+            @RequestParam("category") String category,
+            @RequestParam("imageFiles") MultipartFile[] imageFiles
+    ){
+        ProductRequest request = new ProductRequest(name, price, description, quantity, imageFiles, category);
         ProductResponse response = productService.updateProduct(id, request);
         return ResponseEntity.ok(response);
     }
