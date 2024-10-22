@@ -39,11 +39,12 @@ public class ProductController {
             @RequestParam("price") Long price,
             @RequestParam("description") String description,
             @RequestParam("quantity") Long quantity,
-            @RequestParam("category") String category,
+            @RequestParam("categoryId") Long categoryId,
+            @RequestParam("userId") Long userId,
             @RequestParam("imageFiles") MultipartFile[] imageFiles
     )
     {
-        ProductRequest request = new ProductRequest(name, price, description, quantity, imageFiles, category);
+        ProductRequest request = new ProductRequest(name, price, description, quantity, imageFiles, categoryId, userId);
         ProductResponse response = productService.createProduct(request);
         return ResponseEntity.ok(response);
     }
@@ -61,10 +62,11 @@ public class ProductController {
             @RequestParam("price") Long price,
             @RequestParam("description") String description,
             @RequestParam("quantity") Long quantity,
-            @RequestParam("category") String category,
+            @RequestParam("categoryId") Long categoryId,
+            @RequestParam("userId") Long userId,
             @RequestParam("imageFiles") MultipartFile[] imageFiles
     ){
-        ProductRequest request = new ProductRequest(name, price, description, quantity, imageFiles, category);
+        ProductRequest request = new ProductRequest(name, price, description, quantity, imageFiles, categoryId, userId);
         ProductResponse response = productService.updateProduct(id, request);
         return ResponseEntity.ok(response);
     }
