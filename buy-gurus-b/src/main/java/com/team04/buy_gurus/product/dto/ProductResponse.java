@@ -31,7 +31,7 @@ public class ProductResponse {
         this.price = product.getPrice();
         this.description = product.getDescription();
         this.quantity = product.getQuantity();
-        this.tradeName = product.getSeller() != null ? product.getSeller().getTradeName() : null;
+        //this.tradeName = product.getSeller() != null ? product.getSeller().getTradeName() : null;
         this.sellerUserId = product.getSeller() != null ? product.getSeller().getUser().getId() : null;
         this.category = product.getCategory() != null ? product.getCategory().getName() : null; // 카테고리 이름 처리
         this.imageUrls = new ArrayList<>(); // 빈 리스트 초기화

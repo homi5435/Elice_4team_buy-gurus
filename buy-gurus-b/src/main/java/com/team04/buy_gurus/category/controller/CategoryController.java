@@ -28,26 +28,4 @@ public class CategoryController {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/category")
     public List<CategoryDto> findAllCategory(){ return categoryService.findAllCategory();}
-
-    @DeleteMapping("/category/{id}")
-    @ResponseStatus(HttpStatus.OK)
-    public Response deleteCategory(final @PathVariable Long id){
-        categoryService.deleteCategory(id);
-        return Response.success();
-    }
-//최초의 대분류 카테고리를 생성하는 로직
-    @PostMapping("/FirstCategory")
-    public Response createFirstCategory(@Valid @RequestBody final CategoryCreateRequest request){
-        categoryService.createCategory(request.getName());
-        return Response.success();
-    }
-
-
-    @PostMapping("/category")
-    public Response createCategory(@Valid @RequestBody final CategoryCreateRequest request){
-        categoryService.updateCategory(request);
-        return Response.success();
-    }
-
-
 }

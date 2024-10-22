@@ -189,7 +189,7 @@ public class ProductService {
                 .quantity(product.getQuantity())
                 .imageUrls(imageUrls)
                 .category(product.getCategory() != null ? product.getCategory().getName() : null)
-                .tradeName(product.getSeller() != null ? product.getSeller().getTradeName() : null)
+                //.tradeName(product.getSeller() != null ? product.getSeller().getTradeName() : null)
                 .sellerUserId(product.getSeller() != null ? product.getSeller().getUser().getId() : null)
                 .build();
     }
