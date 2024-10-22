@@ -13,6 +13,8 @@ import com.team04.buy_gurus.product.repository.ProductImageRepository;
 import com.team04.buy_gurus.product.repository.ProductRepository;
 import com.team04.buy_gurus.sellerinfo.entity.SellerInfo;
 import com.team04.buy_gurus.sellerinfo.repository.SellerInfoRepository;
+import com.team04.buy_gurus.user.entity.User;
+import com.team04.buy_gurus.user.repository.UserRepository;
 import com.team04.buy_gurus.utils.s3_bucket.S3BucketService;
 import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
@@ -20,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -31,19 +34,19 @@ public class ProductService {
     private static final Logger log = LoggerFactory.getLogger(ProductService.class);
     private final ProductRepository productRepository;
     private final ProductImageRepository productImageRepository;
-    private final SellerInfoRepository sellerInfoRepository;
+    private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final S3BucketService s3BucketService;
 
     @Autowired
     public ProductService(ProductRepository productRepository,
                           ProductImageRepository productImageRepository,
-                          SellerInfoRepository sellerInfoRepository,
+                          UserRepository userRepository,
                           CategoryRepository categoryRepository,
                           S3BucketService s3BucketService){
         this.productRepository = productRepository;
         this.productImageRepository = productImageRepository;
-        this.sellerInfoRepository = sellerInfoRepository;
+        this.userRepository = userRepository;
         this.categoryRepository = categoryRepository;
         this.s3BucketService = s3BucketService;
     }
@@ -86,7 +89,7 @@ public class ProductService {
     @Transactional
     public ProductResponse createProduct(ProductRequest request, Long userId){
 
-        SellerInfo sellerInfo = sellerInfoRepository.findByUserId(userId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(UserNotFoundException::new);
 
         Category category = categoryRepository.findById(request.getCategoryId())
@@ -98,7 +101,7 @@ public class ProductService {
                 .description(request.getDescription())
                 .quantity(request.getQuantity())
                 .category(category)
-                .seller(sellerInfo)
+                .user(user)
                 .isDeleted(false)
                 .build();
 
@@ -106,7 +109,7 @@ public class ProductService {
         if(request.getImageFiles() != null){
             List<String> fileUrls;
             try{
-                fileUrls = s3BucketService.upload(request.getImageFiles(), sellerInfo.getId() + "_" + request.getName());
+                fileUrls = s3BucketService.upload(request.getImageFiles(), user.getId() + "_" + request.getName());
             } catch (IOException e){
                 throw new RuntimeException("이미지 업로드 실패: " + e.getMessage());
             }
@@ -157,7 +160,7 @@ public class ProductService {
         if (request.getImageFiles() != null) {
             List<String> fileUrls;
             try {
-                fileUrls = s3BucketService.upload(request.getImageFiles(),product.getSeller().getId() + "_" + request.getName()); // S3에 업로드
+                fileUrls = s3BucketService.upload(request.getImageFiles(),product.getUser().getId() + "_" + request.getName()); // S3에 업로드
             } catch (IOException e) {
                 throw new RuntimeException("이미지 업로드 실패: " + e.getMessage());
             }
