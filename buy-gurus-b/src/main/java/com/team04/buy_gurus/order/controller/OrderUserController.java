@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/order")
 @RequiredArgsConstructor
-public class OrderController {
+public class OrderUserController {
     private final OrderService orderService;
 
     // 주문 완료 시 저장
@@ -40,26 +40,6 @@ public class OrderController {
     public ResponseEntity<CommonResponseDTO<OrderResponse>> getOrder(@PathVariable("id") Long orderId, @AuthenticationPrincipal CustomUserDetails userDetails) {
         Order order = orderService.getOrder(orderId, userDetails);
         return ResponseEntity.ok(new CommonResponseDTO<>(CommonSuccess.ORDER_FOUND, new OrderResponse(order)));
-    }
-
-    @PatchMapping("/{id}/invoice")
-    public ResponseEntity<CommonResponseDTO<String>> updateInvoiceNumber(
-            @PathVariable("id") Long orderId,
-            @Valid @RequestBody OrderUpdateRequest.Invoice request,
-            @AuthenticationPrincipal CustomUserDetails userDetails
-    ) throws Exception {
-        orderService.updateInvoiceNumber(orderId, userDetails, request);
-        return ResponseEntity.ok(new CommonResponseDTO<>(CommonSuccess.ORDER_UPDATE_SUCCESS));
-    }
-
-    @PatchMapping("/{id}/status")
-    public ResponseEntity<?> updateStatus(
-            @PathVariable("id") Long orderId,
-            @Valid @RequestBody OrderUpdateRequest.Status request,
-            @AuthenticationPrincipal CustomUserDetails userDetails
-    ) throws Exception {
-        orderService.updateStatus(orderId, userDetails, request);
-        return ResponseEntity.ok(new CommonResponseDTO<>(CommonSuccess.ORDER_UPDATE_SUCCESS));
     }
 
     @PatchMapping("/{id}/address")
