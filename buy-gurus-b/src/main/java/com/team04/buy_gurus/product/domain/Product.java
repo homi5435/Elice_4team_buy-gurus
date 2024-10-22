@@ -55,8 +55,8 @@ public class Product {
     private Category category;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id", insertable = true, updatable = true)
-    private User user;
+    @JoinColumn(name = "seller_id", referencedColumnName = "id", insertable = true, updatable = true)
+    private User seller;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<ProductImage> productImages;
