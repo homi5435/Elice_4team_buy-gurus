@@ -83,7 +83,7 @@ public class OrderResponse {
         private final String company;
 
         public SellerInfo(Order order) {
-            this.id = order.getSellerInfo().getId();
+            this.id = order.getSeller().getId();
             this.name = order.getSellerName();
             this.phoneNum = order.getSellerPhoneNum();
             this.company = order.getSellerCompany();
