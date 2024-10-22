@@ -10,15 +10,15 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.Optional;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
-    @Query("SELECT o FROM Order o JOIN o.user u WHERE u.id = :sellerId")
+    @Query("SELECT o FROM Order o WHERE o.buyer.id = :sellerId AND o.isDeleted = false")
     Page<Order> findAllByUser(@Param("sellerId") Long sellerId, Pageable pageable);
 
-    @Query("SELECT o FROM Order o JOIN o.sellerInfo si WHERE si.id = :sellerId")
+    @Query("SELECT o FROM Order o WHERE o.seller.id = :sellerId")
     Page<Order> findAllBySellerInfo(@Param("sellerId") Long sellerId, Pageable pageable);
 
-    @Query("SELECT o FROM Order o JOIN o.user u JOIN o.sellerInfo s WHERE o.id = :orderId AND (u.id = :userId OR s.user.id = :userId)")
+    @Query("SELECT o FROM Order o JOIN o.buyer b JOIN o.seller s WHERE o.id = :orderId AND (b.id = :userId OR s.id = :userId)")
     Optional<Order> findByOrderIdAndUserId(@Param("orderId") Long orderId, @Param("userId") Long userId);
 
-    @Query("SELECT o FROM Order o JOIN o.user u WHERE u.id = :userId AND o.status = :status")
+    @Query("SELECT o FROM Order o WHERE o.buyer.id = :userId AND o.status = :status")
     Optional<Order> findByUserIdAndStatus(@Param("userId") Long userId, @Param("status") String status);
 }
