@@ -11,6 +11,8 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
+import java.util.List;
+
 @Entity
 @Table(name = "product")
 @SQLDelete(sql = "UPDATE product SET is_deleted = true WHERE id = ?")
@@ -48,10 +50,13 @@ public class Product {
     private Long quantity;
 
     @ManyToOne
-    @JoinColumn(name = "category_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @JoinColumn(name = "category_id", referencedColumnName = "id", insertable = true, updatable = true)
     private Category category;
 
     @ManyToOne
-    @JoinColumn(name = "seller_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @JoinColumn(name = "seller_id", referencedColumnName = "id", insertable = true, updatable = true)
     private SellerInfo seller;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    private List<ProductImage> productImages;
 }
