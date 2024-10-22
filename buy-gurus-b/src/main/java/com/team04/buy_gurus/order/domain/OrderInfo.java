@@ -42,10 +42,10 @@ public class OrderInfo {
     public OrderInfo(BOrderRequest.OrderInfoRequest orderInfoRequest, Product product, Order order) {
         this.quantity = orderInfoRequest.getQuantity();
         this.productName = product.getName();
+        this.productImageUrl = product.getProductImages().get(0).getImageUrl();
         this.product = product;
         this.order = order;
         this.price = product.getPrice();
-        // product image 추가 필요
     }
 
     public void setIsReviewed() {
