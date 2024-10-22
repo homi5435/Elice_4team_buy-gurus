@@ -80,7 +80,7 @@ public class UserService {
                 .orElseThrow(UserNotFoundException::new);
     }
 
-    public void sellerRegistration(Long userId) {
+    public void sellerApproval(Long userId) {
         // TODO
         // 중복 Seller 가입 체크를 깔끔하게 작성!
         Optional<User> user = userRepository.findById(userId);

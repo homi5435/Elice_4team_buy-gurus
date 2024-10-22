@@ -18,21 +18,19 @@ public class SellerInfo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "business_number")
-    private String businessNum;
-
     @Column(name = "business_phone_number")
     private String businessPhoneNum;
 
-    @Column(name = "trade_name")
-    private String tradeName;
+    @Column(name = "business_registration_file")
+    private String businessRegistrationFile;
 
-    @Column(name = "business_adress")
-    private String businessAdress;
+    @Column(name = "bank_account_copy_file")
+    private String bankAccountCopyFile;
+
+    @Column(name = "identity_proof_file")
+    private String identityProofFile;
 
     @OneToOne
     @JoinColumn(name = "user_id")
     private User user;
-
-    // 필수 서류
 }

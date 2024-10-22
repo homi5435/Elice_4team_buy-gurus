@@ -103,7 +103,7 @@ public class Order {
 
     public void setSeller(SellerInfo sellerInfo) {
         this.sellerInfo = sellerInfo;
-        this.sellerCompany = sellerInfo.getTradeName();
+        //this.sellerCompany = sellerInfo.getTradeName();
         this.sellerName = sellerInfo.getUser().getNickname();
         this.sellerPhoneNum = sellerInfo.getBusinessPhoneNum();
     }

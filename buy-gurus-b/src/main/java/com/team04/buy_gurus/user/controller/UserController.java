@@ -54,11 +54,11 @@ public class UserController {
             return ResponseEntity.ok(new UserResponse<>("회원 정보 수정 성공", response));
     }
 
-    @PatchMapping("/seller-registration")
-    public ResponseEntity<UserResponse<Void>> updateRole(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+    @PatchMapping("/admin/seller-registration")
+    public ResponseEntity<UserResponse<Void>> updateRole() {
 
-        userService.sellerRegistration(customUserDetails.getUserId());
-        return ResponseEntity.ok(new UserResponse<>("판매자 등록 성공", null));
+        //userService.sellerApproval();
+        return ResponseEntity.ok(new UserResponse<>("판매자 승인 성공", null));
     }
 
     @PatchMapping("/reset-password")
@@ -69,11 +69,14 @@ public class UserController {
     }
 
     @DeleteMapping("/userMe")
-    public ResponseEntity<UserResponse<Void>> deleteUser(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+    public ResponseEntity<UserResponse<Void>> deleteUser(@AuthenticationPrincipal CustomUserDetails customUserDetails, HttpServletResponse response) {
 
-            userService.withdrawal(customUserDetails.getUserId());
-            return ResponseEntity.status(HttpStatus.NO_CONTENT)
-                    .body(new UserResponse<>("회원 탈퇴 성공", null));
+        userService.withdrawal(customUserDetails.getUserId());
+        jwtService.removeAccessTokenToCookie(response);
+        jwtService.removeRefreshTokenToCookie(response);
+
+        return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                .body(new UserResponse<>("회원 탈퇴 성공", null));
     }
 
     @PostMapping("/logout")
