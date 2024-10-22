@@ -5,35 +5,17 @@ import com.team04.buy_gurus.product.dto.ProductResponse;
 import com.team04.buy_gurus.product.service.ProductService;
 import com.team04.buy_gurus.user.CustomUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 @RestController
-@RequestMapping("/api/product")
-public class ProductController {
+@RequestMapping("/api/admin/product")
+public class AdminProductController {
 
     @Autowired
     private ProductService productService;
-
-    @GetMapping
-    public ResponseEntity<Page<ProductResponse>> getAllProducts(Pageable pageable){
-        Page<ProductResponse> responseDtoList = productService.getAllProducts(pageable);
-        return ResponseEntity.ok(responseDtoList);
-    }
-
-    @GetMapping("/search")
-    public ResponseEntity<Page<ProductResponse>> searchProducts(
-            @RequestParam(required = false) Long parentId,
-            @RequestParam(required = false) Long categoryId,
-            @RequestParam(required = false) String name,
-            Pageable pageable) {
-        Page<ProductResponse> responseDtoList = productService.searchProducts(parentId, categoryId, name, pageable);
-        return ResponseEntity.ok(responseDtoList);
-    }
 
     @PostMapping
     public ResponseEntity<ProductResponse> createProduct(
@@ -48,12 +30,6 @@ public class ProductController {
     {
         ProductRequest request = new ProductRequest(name, price, description, quantity, imageFiles, categoryId);
         ProductResponse response = productService.createProduct(request, userDetails.getUserId());
-        return ResponseEntity.ok(response);
-    }
-
-    @GetMapping("/{productId}")
-    public ResponseEntity<ProductResponse> getProduct(@PathVariable Long id){
-        ProductResponse response = productService.getProduct(id);
         return ResponseEntity.ok(response);
     }
 
