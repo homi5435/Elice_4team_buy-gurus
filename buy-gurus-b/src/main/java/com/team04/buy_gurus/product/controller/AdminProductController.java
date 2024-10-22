@@ -35,23 +35,22 @@ public class AdminProductController {
 
     @PatchMapping("/{productId}")
     public ResponseEntity<ProductResponse> updateProduct(
-            @PathVariable Long id,
+            @PathVariable Long productId,
             @RequestParam("name") String name,
             @RequestParam("price") Long price,
             @RequestParam("description") String description,
             @RequestParam("quantity") Long quantity,
             @RequestParam("categoryId") Long categoryId,
-            @RequestParam("userId") Long userId,
             @RequestParam("imageFiles") MultipartFile[] imageFiles
     ){
         ProductRequest request = new ProductRequest(name, price, description, quantity, imageFiles, categoryId);
-        ProductResponse response = productService.updateProduct(id, request);
+        ProductResponse response = productService.updateProduct(productId, request);
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{productId}")
-    public ResponseEntity<Void> deleteProduct(@PathVariable Long id){
-        productService.deleteProduct(id);
+    public ResponseEntity<Void> deleteProduct(@PathVariable Long productId){
+        productService.deleteProduct(productId);
         return ResponseEntity.noContent().build();
     }
 }

@@ -2,6 +2,7 @@ package com.team04.buy_gurus.product.domain;
 
 import com.team04.buy_gurus.category.domain.Category;
 import com.team04.buy_gurus.sellerinfo.entity.SellerInfo;
+import com.team04.buy_gurus.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -54,8 +55,8 @@ public class Product {
     private Category category;
 
     @ManyToOne
-    @JoinColumn(name = "seller_id", referencedColumnName = "id", insertable = true, updatable = true)
-    private SellerInfo seller;
+    @JoinColumn(name = "user_id", referencedColumnName = "id", insertable = true, updatable = true)
+    private User user;
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
     private List<ProductImage> productImages;
