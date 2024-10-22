@@ -47,9 +47,6 @@ public class User {
     @Column(name = "refresh_token", nullable = true)
     private String refreshToken;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-    private SellerInfo sellerInfo;
-
     public void updateRefreshToken(String refreshToken) {
         this.refreshToken = refreshToken;
     }
