@@ -23,6 +23,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -101,24 +102,26 @@ public class ProductService {
                 .isDeleted(false)
                 .build();
 
-        Product savedProduct = productRepository.save(product);
-
+        List<ProductImage> images = new ArrayList<>();
         if(request.getImageFiles() != null){
             List<String> fileUrls;
             try{
-                fileUrls = s3BucketService.upload(request.getImageFiles());
+                fileUrls = s3BucketService.upload(request.getImageFiles(), sellerInfo.getId() + "_" + request.getName());
             } catch (IOException e){
                 throw new RuntimeException("이미지 업로드 실패: " + e.getMessage());
             }
 
-            for (String fileUrl : fileUrls){
-                ProductImage productImage = ProductImage.builder()
-                        .imageUrl(fileUrl)
-                        .product(savedProduct)
-                        .build();
-                productImageRepository.save(productImage);
-            }
+            images = fileUrls.stream()
+                    .map(fileUrl -> ProductImage.builder()
+                            .imageUrl(fileUrl)
+                            .product(product)
+                            .build())
+                    .toList();
         }
+
+        product.setProductImages(images);
+
+        Product savedProduct = productRepository.save(product);
 
         return mapToResponseDto(savedProduct);
     }
@@ -147,34 +150,47 @@ public class ProductService {
         product.setCategory(category);
 
         // 기존 이미지 삭제 및 새로운 이미지 추가
-        productImageRepository.deleteByProductId(id); // 이전 이미지를 삭제
+        deleteImagesFromS3(id);                       // <-- 삭제 이미지 로직 추가
+        productImageRepository.deleteByProductId(id); // 이전 이미지를 삭제 <-- S3에 저장된 이미지 삭제 로직은요..?
+
+        List<ProductImage> images = new ArrayList<>();
         if (request.getImageFiles() != null) {
             List<String> fileUrls;
             try {
-                fileUrls = s3BucketService.upload(request.getImageFiles()); // S3에 업로드
+                fileUrls = s3BucketService.upload(request.getImageFiles(),product.getSeller().getId() + "_" + request.getName()); // S3에 업로드
             } catch (IOException e) {
                 throw new RuntimeException("이미지 업로드 실패: " + e.getMessage());
             }
 
-            for (String fileUrl : fileUrls) {
-                ProductImage productImage = ProductImage.builder()
-                        .imageUrl(fileUrl)
-                        .product(product)
-                        .build();
-                productImageRepository.save(productImage);
-            }
+            images = fileUrls.stream()
+                    .map(fileUrl -> ProductImage.builder()
+                            .imageUrl(fileUrl)
+                            .product(product)
+                            .build()
+                    )
+                    .toList();
         }
-
-        Product updatedProduct = productRepository.save(product);
-        return mapToResponseDto(updatedProduct);
+        product.setProductImages(images);
+        return mapToResponseDto(product);
     }
 
     @Transactional
     public void deleteProduct(Long id){
         Product product = productRepository.findById(id)
                 .orElseThrow(()->new ProductNotFoundException("삭제할 상품이 존재하지 않습니다."));
-        product.setDeleted(true);
-        productRepository.save(product);
+        deleteImagesFromS3(id);
+        productRepository.delete(product); // <-- SQLDelete 어노테이션을 사용했기에 delete만 호출해도 됩니다.
+//        product.setDeleted(true);
+//        productRepository.save(product); // <-- find 하면 Context에 저장되어있는데 save를 다시 호출할 필요가 있을까요?
+    }
+
+    private void deleteImagesFromS3(Long productId) {
+        List<ProductImage> images = productImageRepository.findByProductId(productId);
+        s3BucketService.remove(
+                images.stream()
+                        .map(ProductImage::getImageUrl)
+                        .toArray(String[]::new)
+        );
     }
 
     private ProductResponse mapToResponseDto(Product product, List<ProductImage> images){
