@@ -48,10 +48,10 @@ public class Product {
     private Long quantity;
 
     @ManyToOne
-    @JoinColumn(name = "category_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @JoinColumn(name = "category_id", referencedColumnName = "id", insertable = true, updatable = true)
     private Category category;
 
     @ManyToOne
-    @JoinColumn(name = "seller_id", referencedColumnName = "id", insertable = false, updatable = false)
+    @JoinColumn(name = "seller_id", referencedColumnName = "id", insertable = true, updatable = true)
     private SellerInfo seller;
 }
