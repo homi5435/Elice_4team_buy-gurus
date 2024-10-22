@@ -42,9 +42,8 @@ public class JwtService {
     public String createAccessToken(Long userId, String role) {
         Date now = new Date();
         return JWT.create()
-                .withSubject(ACCESS_TOKEN_SUBJECT)
+                .withSubject(userId.toString())
                 .withExpiresAt(new Date(now.getTime() + jwtProperties.getAccessTokenExpiration()))
-                .withClaim(USER_ID_CLAIM, userId)
                 .withClaim(ROLE_CLAIM, role)
                 .sign(Algorithm.HMAC512(jwtProperties.getSecretKey()));
     }
@@ -83,11 +82,12 @@ public class JwtService {
 
     public Optional<Long> extractUserId(String accessToken) {
         try {
-            return Optional.ofNullable(JWT.require(Algorithm.HMAC512(jwtProperties.getSecretKey()))
+            String userId = JWT.require(Algorithm.HMAC512(jwtProperties.getSecretKey()))
                     .build()
                     .verify(accessToken)
-                    .getClaim(USER_ID_CLAIM)
-                    .asLong());
+                    .getSubject();
+
+            return Optional.ofNullable(Long.valueOf(userId));
         } catch (Exception e) {
             return Optional.empty();
         }
