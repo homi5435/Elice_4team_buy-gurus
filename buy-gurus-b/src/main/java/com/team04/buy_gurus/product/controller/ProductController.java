@@ -3,10 +3,12 @@ package com.team04.buy_gurus.product.controller;
 import com.team04.buy_gurus.product.dto.ProductRequest;
 import com.team04.buy_gurus.product.dto.ProductResponse;
 import com.team04.buy_gurus.product.service.ProductService;
+import com.team04.buy_gurus.user.CustomUserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -40,12 +42,12 @@ public class ProductController {
             @RequestParam("description") String description,
             @RequestParam("quantity") Long quantity,
             @RequestParam("categoryId") Long categoryId,
-            @RequestParam("userId") Long userId,
-            @RequestParam("imageFiles") MultipartFile[] imageFiles
+            @RequestParam("imageFiles") MultipartFile[] imageFiles,
+            @AuthenticationPrincipal CustomUserDetails userDetails
     )
     {
-        ProductRequest request = new ProductRequest(name, price, description, quantity, imageFiles, categoryId, userId);
-        ProductResponse response = productService.createProduct(request);
+        ProductRequest request = new ProductRequest(name, price, description, quantity, imageFiles, categoryId);
+        ProductResponse response = productService.createProduct(request, userDetails.getUserId());
         return ResponseEntity.ok(response);
     }
 
@@ -66,7 +68,7 @@ public class ProductController {
             @RequestParam("userId") Long userId,
             @RequestParam("imageFiles") MultipartFile[] imageFiles
     ){
-        ProductRequest request = new ProductRequest(name, price, description, quantity, imageFiles, categoryId, userId);
+        ProductRequest request = new ProductRequest(name, price, description, quantity, imageFiles, categoryId);
         ProductResponse response = productService.updateProduct(id, request);
         return ResponseEntity.ok(response);
     }

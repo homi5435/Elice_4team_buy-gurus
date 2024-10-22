@@ -83,8 +83,9 @@ public class ProductService {
     }
 
     @Transactional
-    public ProductResponse createProduct(ProductRequest request){
-        SellerInfo sellerInfo = sellerInfoRepository.findByUserId(request.getUserId())
+    public ProductResponse createProduct(ProductRequest request, Long userId){
+
+        SellerInfo sellerInfo = sellerInfoRepository.findByUserId(userId)
                 .orElseThrow(UserNotFoundException::new);
 
         Category category = categoryRepository.findById(request.getCategoryId())

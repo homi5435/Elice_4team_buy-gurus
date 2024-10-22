@@ -1,6 +1,5 @@
 package com.team04.buy_gurus.product.dto;
 
-import com.team04.buy_gurus.category.domain.Category;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -30,7 +29,4 @@ public class ProductRequest {
 
     @NotBlank(message = "카테고리는 반드시 선택하여야 합니다.")
     private Long categoryId;
-
-    @NotBlank(message = "유저ID는 반드시 포함되어야 합니다.")
-    private Long UserId;
 }
