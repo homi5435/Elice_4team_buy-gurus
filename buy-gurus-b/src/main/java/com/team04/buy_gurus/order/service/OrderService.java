@@ -16,12 +16,11 @@ import com.team04.buy_gurus.order.repository.OrderRepository;
 import com.team04.buy_gurus.product.aop.ProductNotFoundException;
 import com.team04.buy_gurus.product.domain.Product;
 import com.team04.buy_gurus.product.repository.ProductRepository;
-import com.team04.buy_gurus.sellerinfo.entity.SellerInfo;
-import com.team04.buy_gurus.sellerinfo.repository.SellerInfoRepository;
 import com.team04.buy_gurus.user.CustomUserDetails;
 import com.team04.buy_gurus.user.entity.User;
 import com.team04.buy_gurus.user.repository.UserRepository;
 import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -38,7 +37,6 @@ import java.util.stream.Collectors;
 public class OrderService {
     private OrderRepository orderRepository;
     private ProductRepository productRepository;
-    private SellerInfoRepository sellerInfoRepository;
     private UserRepository userRepository;
 
     private StringBuilder sb;
@@ -50,12 +48,10 @@ public class OrderService {
     public OrderService(
             OrderRepository orderRepository,
             ProductRepository productRepository,
-            SellerInfoRepository sellerInfoRepository,
             UserRepository userRepository
     )  {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
-        this.sellerInfoRepository = sellerInfoRepository;
         this.userRepository = userRepository;
         this.sb = new StringBuilder();
     }
@@ -129,19 +125,17 @@ public class OrderService {
         for (BOrderRequest orderRequest: orderRequests.getOrderRequests()) {
             BOrderRequest.ShippingInfo shippingInfo = orderRequest.getShippingInfo();
 
-            SellerInfo sellerInfo = sellerInfoRepository.findById(orderRequest.getSellerId()).orElseThrow(() -> new NotExistsSellerException(CommonError.SELLER_NOT_FOUND));
-
-            User user = userRepository.findById(userDetails.getUserId()).orElseThrow(() -> new NotOrderedException(CommonError.USER_NOT_ORDERED));
+            User seller = userRepository.findById(orderRequest.getSellerId()).orElseThrow(() -> new NotExistsSellerException(CommonError.SELLER_NOT_FOUND));
+            User buyer = userRepository.findById(userDetails.getUserId()).orElseThrow(() -> new NotOrderedException(CommonError.USER_NOT_ORDERED));
 
             Order order = Order.builder()
                     .status(Order.Status.PROCESSING)
                     .shippingAddress(shippingInfo.getAddress())
                     .customerName(shippingInfo.getName())
                     .customerPhoneNum(shippingInfo.getPhoneNum())
-                    .sellerInfo(sellerInfo)
-                    .user(user)
+                    .buyer(buyer)
                     .build();
-            order.setSeller(sellerInfo);
+            order.setSeller(seller);
 
             List<OrderInfo> orderInfoList = createOrderInfos(orderRequest.getOrderInfoList(), order);
             int allPrice = sumAllPrice(orderRequest.getOrderInfoList());
@@ -174,8 +168,8 @@ public class OrderService {
             User user = userRepository.findById(userDetails.getUserId()).orElseThrow(() -> new NotOrderedException(CommonError.USER_NOT_ORDERED));
             return orderRepository.findAllByUser(user.getId(), pageable);
         } else {
-            SellerInfo sellerInfo = sellerInfoRepository.findByUserId(userDetails.getUserId()).orElseThrow(() -> new NotSellerException(CommonError.SELLER_NOT_SOLD));
-            return orderRepository.findAllBySellerInfo(sellerInfo.getId(), pageable);
+            User seller = userRepository.findById(userDetails.getUserId()).orElseThrow(() -> new NotSellerException(CommonError.SELLER_NOT_SOLD));
+            return orderRepository.findAllBySellerInfo(seller.getId(), pageable);
         }
     }
 
@@ -184,12 +178,12 @@ public class OrderService {
     }
 
     private void isValidSeller(Order order, CustomUserDetails userDetails) throws Exception {
-        sellerInfoRepository.findByUserId(userDetails.getUserId()).orElseThrow(() -> new NotSellerException(CommonError.NOT_SELLER));
-        if (!order.getSellerInfo().getUser().getId().equals(userDetails.getUserId())) throw new NotSoldException(CommonError.SELLER_NOT_ASSIGN_EDIT);
+        userRepository.findById(userDetails.getUserId()).orElseThrow(() -> new NotSellerException(CommonError.NOT_SELLER));
+        if (!order.getSeller().getId().equals(userDetails.getUserId())) throw new NotSoldException(CommonError.SELLER_NOT_ASSIGN_EDIT);
     }
 
     private void isValidUser(Order order, CustomUserDetails userDetails) throws Exception {
-        if (!order.getUser().getId().equals(userDetails.getUserId())) throw new NotOrderedException(CommonError.USER_NOT_ASSIGN_EDIT);
+        if (!order.getBuyer().getId().equals(userDetails.getUserId())) throw new NotOrderedException(CommonError.USER_NOT_ASSIGN_EDIT);
     }
 
     @Transactional
