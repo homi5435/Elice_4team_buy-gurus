@@ -11,8 +11,6 @@ import com.team04.buy_gurus.product.dto.ProductRequest;
 import com.team04.buy_gurus.product.dto.ProductResponse;
 import com.team04.buy_gurus.product.repository.ProductImageRepository;
 import com.team04.buy_gurus.product.repository.ProductRepository;
-import com.team04.buy_gurus.sellerinfo.entity.SellerInfo;
-import com.team04.buy_gurus.sellerinfo.repository.SellerInfoRepository;
 import com.team04.buy_gurus.user.entity.User;
 import com.team04.buy_gurus.user.repository.UserRepository;
 import com.team04.buy_gurus.utils.s3_bucket.S3BucketService;

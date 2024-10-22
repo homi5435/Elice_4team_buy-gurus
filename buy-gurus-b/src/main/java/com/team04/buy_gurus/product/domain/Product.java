@@ -1,7 +1,6 @@
 package com.team04.buy_gurus.product.domain;
 
 import com.team04.buy_gurus.category.domain.Category;
-import com.team04.buy_gurus.sellerinfo.entity.SellerInfo;
 import com.team04.buy_gurus.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

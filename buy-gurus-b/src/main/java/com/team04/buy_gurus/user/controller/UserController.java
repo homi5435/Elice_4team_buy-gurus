@@ -54,13 +54,6 @@ public class UserController {
             return ResponseEntity.ok(new UserResponse<>("회원 정보 수정 성공", response));
     }
 
-    @PatchMapping("/admin/seller-registration")
-    public ResponseEntity<UserResponse<Void>> updateRole() {
-
-        //userService.sellerApproval();
-        return ResponseEntity.ok(new UserResponse<>("판매자 승인 성공", null));
-    }
-
     @PatchMapping("/reset-password")
     public ResponseEntity<UserResponse<Void>> updatePassword(@RequestBody @Valid ResetPasswordRequestDto request) {
 

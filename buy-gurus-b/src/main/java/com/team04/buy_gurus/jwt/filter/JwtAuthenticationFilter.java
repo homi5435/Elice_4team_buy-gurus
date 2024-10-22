@@ -5,7 +5,6 @@ import com.team04.buy_gurus.jwt.service.JwtService;
 import com.team04.buy_gurus.user.CustomUserDetails;
 import com.team04.buy_gurus.user.entity.User;
 import com.team04.buy_gurus.user.repository.UserRepository;
-import com.team04.buy_gurus.util.PasswordUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

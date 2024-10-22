@@ -1,6 +1,5 @@
 package com.team04.buy_gurus.user.entity;
 
-import com.team04.buy_gurus.sellerinfo.entity.SellerInfo;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -65,10 +64,6 @@ public class User {
 
     public void updatePassword(String password) {
         this.password = password;
-    }
-
-    public void updateSellerInfo(SellerInfo sellerInfo){
-        this.sellerInfo = sellerInfo;
     }
 }
 
