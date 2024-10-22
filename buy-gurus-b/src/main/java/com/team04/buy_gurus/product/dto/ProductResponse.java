@@ -20,6 +20,7 @@ public class ProductResponse {
     private Long price;
     private String description;
     private Long quantity;
+    @Builder.Default
     private List<String> imageUrls = new ArrayList<>();
     private String category;
 

@@ -36,6 +36,7 @@ public class Order {
     private boolean isDeleted;
 
     // 주문 상태
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @ColumnDefault("'PROCESSING'")
     private Status status = Status.PROCESSING;
