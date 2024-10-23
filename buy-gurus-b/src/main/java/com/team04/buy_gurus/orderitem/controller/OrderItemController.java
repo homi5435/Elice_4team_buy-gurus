@@ -1,5 +1,6 @@
 package com.team04.buy_gurus.orderitem.controller;
 
+import com.team04.buy_gurus.exception.ex_orderItem.exception.UnauthorizedException;
 import com.team04.buy_gurus.orderitem.dto.OrderItemRequestDto;
 import com.team04.buy_gurus.orderitem.dto.OrderItemResponseDto;
 import com.team04.buy_gurus.orderitem.service.OrderItemService;
@@ -21,14 +22,21 @@ public class OrderItemController {
     @PostMapping("api/orderitem/{productId}")
     public ResponseEntity<String> addOrderItem(@Valid @RequestBody OrderItemRequestDto request, @PathVariable Long productId,
                                                @AuthenticationPrincipal CustomUserDetails userDetails){
-        orderItemService.addOrderItem(request, productId, userDetails.getUserId());
+        if (userDetails == null) {
+            throw new UnauthorizedException("로그인을 해주세요.");
+        }
 
+        orderItemService.addOrderItem(request, productId, userDetails.getUserId());
         return ResponseEntity.ok("장바구니 추가 성공");
     }
 
     // 장바구니 조회
     @GetMapping("api/orderitem")
     public ResponseEntity<List<OrderItemResponseDto>> readOrderItem(@AuthenticationPrincipal CustomUserDetails userDetails){
+        if (userDetails == null) {
+            throw new UnauthorizedException("로그인을 해주세요.");
+        }
+
         List<OrderItemResponseDto> response = orderItemService.readOrderItem(userDetails.getUserId());
         
         return ResponseEntity.ok(response);
@@ -44,6 +52,10 @@ public class OrderItemController {
     // 장바구니 전체 삭제
     @DeleteMapping("api/orderitem")
     public ResponseEntity<String> deleteAllOrderItem(@AuthenticationPrincipal CustomUserDetails userDetails){
+        if (userDetails == null) {
+            throw new UnauthorizedException("로그인을 해주세요.");
+        }
+
         orderItemService.deleteAllOrderItem(userDetails.getUserId());
         return ResponseEntity.ok("장바구니 전체 삭제 성공");
     }

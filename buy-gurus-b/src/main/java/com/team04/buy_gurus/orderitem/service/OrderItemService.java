@@ -1,10 +1,14 @@
 package com.team04.buy_gurus.orderitem.service;
 
+import com.team04.buy_gurus.exception.ex_orderItem.exception.OrderItemNotFoundException;
 import com.team04.buy_gurus.orderitem.domain.OrderItem;
 import com.team04.buy_gurus.orderitem.dto.OrderItemRequestDto;
 import com.team04.buy_gurus.orderitem.dto.OrderItemResponseDto;
+import com.team04.buy_gurus.orderitem.dto.ProductResponseDto;
 import com.team04.buy_gurus.orderitem.repository.OrderItemRepository;
 import com.team04.buy_gurus.product.domain.Product;
+import com.team04.buy_gurus.product.domain.ProductImage;
+import com.team04.buy_gurus.product.repository.ProductImageRepository;
 import com.team04.buy_gurus.product.repository.ProductRepository;
 import com.team04.buy_gurus.user.entity.User;
 import com.team04.buy_gurus.user.repository.UserRepository;
@@ -21,6 +25,7 @@ public class OrderItemService {
     private final OrderItemRepository orderItemRepository;
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
+    private final ProductImageRepository productImageRepository;
 
     // 장바구니 추가
     @Transactional
@@ -60,10 +65,24 @@ public class OrderItemService {
 
         List<OrderItem> readOrderItem = orderItemRepository.findByUser(user);
 
-        List<OrderItemResponseDto> response = new ArrayList<>();
+        if (readOrderItem == null || readOrderItem.isEmpty()) {
+            throw new OrderItemNotFoundException("유저의 장바구니에 상품이 없습니다.");
+        }
 
-        for(OrderItem orderItem : readOrderItem){
-            response.add(new OrderItemResponseDto(orderItem));
+        List<OrderItemResponseDto> response = new ArrayList<>();
+        for (OrderItem orderItem : readOrderItem) {
+            String imageUrl = productImageRepository.findFirstByProductId(orderItem.getProduct().getId())
+                    .map(ProductImage::getImageUrl)
+                    .orElse(null);
+
+            ProductResponseDto productResponseDto = new ProductResponseDto(
+                    orderItem.getProduct().getId(),
+                    orderItem.getProduct().getName(),
+                    orderItem.getProduct().getPrice(),
+                    imageUrl
+            );
+
+            response.add(new OrderItemResponseDto(orderItem, productResponseDto));
         }
 
         return response;

@@ -10,10 +10,9 @@ public class OrderItemResponseDto {
     private Long amount;
     private Long price;
 
-    public OrderItemResponseDto(OrderItem orderItem) {
+    public OrderItemResponseDto(OrderItem orderItem, ProductResponseDto productResponseDto) {
         this.id = orderItem.getId();
-        this.product = new ProductResponseDto(orderItem.getProduct().getId(), orderItem.getProduct().getName(),
-                                            orderItem.getProduct().getPrice());
+        this.product = productResponseDto;
         this.amount = orderItem.getAmount();
         this.price = orderItem.getPrice();
     }
