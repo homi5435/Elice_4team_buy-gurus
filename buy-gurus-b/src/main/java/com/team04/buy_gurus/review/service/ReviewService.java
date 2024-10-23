@@ -30,19 +30,16 @@ public class ReviewService {
 
     private final ReviewRepository reviewRepository;
     private final OrderRepository orderRepository;
-    private final OrderInfoRepository orderInfoRepository;
     private final ProductRepository productRepository;
     private final UserRepository userRepository;
 
     @Autowired
     public ReviewService(ReviewRepository reviewRepository,
                          OrderRepository orderRepository,
-                         OrderInfoRepository orderInfoRepository,
                          ProductRepository productRepository,
                          UserRepository userRepository){
         this.reviewRepository = reviewRepository;
         this.orderRepository = orderRepository;
-        this.orderInfoRepository = orderInfoRepository;
         this.productRepository = productRepository;
         this.userRepository = userRepository;
     }
@@ -134,8 +131,7 @@ public class ReviewService {
     public void deleteReview(Long id) {
         Review review = reviewRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("삭제할 리뷰가 존재하지 않습니다."));
-        review.setIsDeleted(true);
-        reviewRepository.save(review);
+        reviewRepository.delete(review);
     }
 
     // Review to ReviewResponse 변환
@@ -144,6 +140,8 @@ public class ReviewService {
                 .id(review.getId())
                 .rating(review.getRating())
                 .comment(review.getComment())
+                .createdAt(review.getCreatedAt())
+                .modifiedAt(review.getModifiedAt())
                 .isDeleted(review.getIsDeleted())
                 .productId(review.getProduct().getId())
                 .userId(review.getUser().getId())
