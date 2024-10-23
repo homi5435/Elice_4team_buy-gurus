@@ -1,5 +1,6 @@
 package com.team04.buy_gurus.orderitem.service;
 
+import com.team04.buy_gurus.exception.ex_orderItem.exception.InsufficientQuantityException;
 import com.team04.buy_gurus.exception.ex_orderItem.exception.OrderItemNotFoundException;
 import com.team04.buy_gurus.orderitem.domain.OrderItem;
 import com.team04.buy_gurus.orderitem.dto.OrderItemRequestDto;
@@ -40,8 +41,13 @@ public class OrderItemService {
 
       Long amount = request.getAmount();
 
+      if (amount > product.getQuantity()) {
+          throw new InsufficientQuantityException("선택한 수량이 재고를 초과합니다.");
+      }
+
       // 희원의 장바구니에 상품이 없다면
       if (existOrderItem == null) {
+
           Long price = amount * product.getPrice();
 
           OrderItem orderItem = new OrderItem(amount, price, user, product);
@@ -50,6 +56,10 @@ public class OrderItemService {
       }
       // 희원의 장바구니에 상품이 있다면
       else{
+          if (existOrderItem.getAmount() + amount > product.getQuantity()) {
+              throw new InsufficientQuantityException("선택한 수량이 재고를 초과합니다.");
+          }
+
           existOrderItem.setAmount(existOrderItem.getAmount() + amount);
           existOrderItem.setPrice(existOrderItem.getAmount() * product.getPrice());
 
@@ -79,7 +89,8 @@ public class OrderItemService {
                     orderItem.getProduct().getId(),
                     orderItem.getProduct().getName(),
                     orderItem.getProduct().getPrice(),
-                    imageUrl
+                    imageUrl,
+                    orderItem.getProduct().getQuantity()
             );
 
             response.add(new OrderItemResponseDto(orderItem, productResponseDto));
@@ -92,6 +103,13 @@ public class OrderItemService {
     @Transactional
     public void patchOrderItem(Long id, Long amount) {
         OrderItem orderItem = orderItemRepository.findById(id).orElseThrow(IllegalArgumentException::new);
+
+        // 재고 부족 체크
+        if (amount > orderItem.getProduct().getQuantity()) {
+            throw new InsufficientQuantityException("선택한 수량이 재고를 초과합니다.");
+        }
+
+
         orderItem.setAmount(amount);
 
         orderItemRepository.save(orderItem);
