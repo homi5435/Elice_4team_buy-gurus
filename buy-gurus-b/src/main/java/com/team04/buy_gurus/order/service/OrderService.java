@@ -1,6 +1,7 @@
 package com.team04.buy_gurus.order.service;
 
 import com.team04.buy_gurus.common.enums.CommonError;
+import com.team04.buy_gurus.exception.ex_product.exception.OutOfStockException;
 import com.team04.buy_gurus.order.domain.Order;
 import com.team04.buy_gurus.order.domain.OrderInfo;
 import com.team04.buy_gurus.order.dto.OrderRequest;
@@ -64,6 +65,26 @@ public class OrderService {
                 .collect(Collectors.toSet());
 
         List<Product> products = productRepository.findAllById(productIdsFromReq);
+
+        Map<Long, Integer> quantityMap = orderRequest.stream().collect(Collectors.toMap(OrderInfoRequest::getProductId, OrderInfoRequest::getQuantity));
+
+        sb.setLength(0);
+        products.forEach(product -> {
+            int quantity = quantityMap.get(product.getId());
+            if(product.getQuantity() < quantity) {
+                sb.append("[")
+                        .append(product.getName())
+                        .append("]의; 재고가 부족합니다. ")
+                        .append("[")
+                        .append(quantity)
+                        .append("/")
+                        .append(product.getQuantity())
+                        .append("]\n");
+            }
+        });
+        if (!sb.isEmpty()) {
+            throw new RuntimeException(sb.toString());
+        }
 
         Set<Long> productIdsFromRepo = products.stream()
                 .map(Product::getId)
@@ -142,6 +163,10 @@ public class OrderService {
             int shippingFee = allPrice < SHIPPING_FEE_CRITERIA ? SHIPPING_FEE : 0;
             order.setShippingFee(shippingFee);
             order.setOrderInfoList(orderInfoList);
+
+            orderInfoList.forEach(orderInfo -> {
+                productRepository.discountQuantity((long) orderInfo.getQuantity(), orderInfo.getProduct().getId());
+            });
 
             orderRepository.save(order);
         }
