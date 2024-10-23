@@ -12,7 +12,8 @@ public class OrderItemResponseDto {
 
     public OrderItemResponseDto(OrderItem orderItem) {
         this.id = orderItem.getId();
-        this.product = new ProductResponseDto(orderItem.getProduct().getName(), orderItem.getProduct().getPrice());
+        this.product = new ProductResponseDto(orderItem.getProduct().getId(), orderItem.getProduct().getName(),
+                                            orderItem.getProduct().getPrice());
         this.amount = orderItem.getAmount();
         this.price = orderItem.getPrice();
     }
