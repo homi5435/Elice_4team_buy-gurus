@@ -1,5 +1,6 @@
 package com.team04.buy_gurus.orderitem.service;
 
+import com.team04.buy_gurus.exception.ex_orderItem.exception.OrderItemNotFoundException;
 import com.team04.buy_gurus.orderitem.domain.OrderItem;
 import com.team04.buy_gurus.orderitem.dto.OrderItemRequestDto;
 import com.team04.buy_gurus.orderitem.dto.OrderItemResponseDto;
@@ -64,8 +65,11 @@ public class OrderItemService {
 
         List<OrderItem> readOrderItem = orderItemRepository.findByUser(user);
 
-        List<OrderItemResponseDto> response = new ArrayList<>();
+        if (readOrderItem == null || readOrderItem.isEmpty()) {
+            throw new OrderItemNotFoundException("유저의 장바구니에 상품이 없습니다.");
+        }
 
+        List<OrderItemResponseDto> response = new ArrayList<>();
         for (OrderItem orderItem : readOrderItem) {
             String imageUrl = productImageRepository.findFirstByProductId(orderItem.getProduct().getId())
                     .map(ProductImage::getImageUrl)
