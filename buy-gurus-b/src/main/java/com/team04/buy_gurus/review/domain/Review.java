@@ -4,6 +4,8 @@ import com.team04.buy_gurus.product.domain.Product;
 import com.team04.buy_gurus.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -14,6 +16,8 @@ import java.util.Optional;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@SQLDelete(sql = "UPDATE review SET is_deleted = true WHERE id = ?")
+@SQLRestriction("is_deleted = false")
 @Builder
 public class Review {
 
