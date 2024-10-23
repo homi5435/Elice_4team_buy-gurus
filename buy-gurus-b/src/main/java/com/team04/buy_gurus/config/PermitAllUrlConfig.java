@@ -14,7 +14,7 @@ public class PermitAllUrlConfig {
                 "/images/**",
                 "/js/**",
                 "/favicon.ico",
-                "/h2-console",
+                "/h2-console/**",
                 "/api/login",
                 "/api/signup",
                 "/oauth2/authorization/**",
