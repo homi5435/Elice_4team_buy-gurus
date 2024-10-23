@@ -1,10 +1,12 @@
 package com.team04.buy_gurus.user.entity;
 
+import com.team04.buy_gurus.refreshtoken.entity.RefreshToken;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -43,12 +45,8 @@ public class User {
     @Column(name = "provide_id", nullable = true)
     private String providerId;
 
-    @Column(name = "refresh_token", nullable = true)
-    private String refreshToken;
-
-    public void updateRefreshToken(String refreshToken) {
-        this.refreshToken = refreshToken;
-    }
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RefreshToken> refreshTokens= new ArrayList<>();
 
     public void updateNickname(String nickname){
         this.nickname = nickname;
@@ -56,10 +54,6 @@ public class User {
 
     public void updateEmail(String email){
         this.email = email;
-    }
-
-    public void updateRole(){
-        this.role = Role.SELLER;
     }
 
     public void updatePassword(String password) {

@@ -1,8 +1,12 @@
 package com.team04.buy_gurus.oauth.handler;
 
+import com.team04.buy_gurus.exception.ex_user.ex.UserNotFoundException;
 import com.team04.buy_gurus.jwt.JwtProperties;
 import com.team04.buy_gurus.jwt.service.JwtService;
 import com.team04.buy_gurus.oauth.CustomOAuth2User;
+import com.team04.buy_gurus.refreshtoken.entity.RefreshToken;
+import com.team04.buy_gurus.refreshtoken.service.RefreshTokenService;
+import com.team04.buy_gurus.user.entity.User;
 import com.team04.buy_gurus.user.repository.UserRepository;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,6 +25,7 @@ import java.io.IOException;
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     private final JwtService jwtService;
+    private final RefreshTokenService refreshTokenService;
     private final UserRepository userRepository;
 
     private static final String REDIRECT_URL = "http://localhost:5173/home";
@@ -31,7 +36,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                                         Authentication authentication) throws IOException, ServletException {
         try {
             CustomOAuth2User oAuth2User = (CustomOAuth2User) authentication.getPrincipal();
-            loginSuccess(response, oAuth2User);
+            loginSuccess(request, response, oAuth2User);
         } catch (Exception e) {
             e.printStackTrace();
             throw e;
@@ -39,14 +44,17 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     }
 
-    private void loginSuccess(HttpServletResponse response, CustomOAuth2User oAuth2User) throws IOException {
+    private void loginSuccess(HttpServletRequest request,
+                              HttpServletResponse response,
+                              CustomOAuth2User oAuth2User) throws IOException {
+        User user = userRepository.findById(oAuth2User.getUserId()).orElseThrow(UserNotFoundException::new);
+
         String accessToken = jwtService.createAccessToken(oAuth2User.getUserId(), oAuth2User.getRole().getValue());
-        String refreshToken = jwtService.createRefreshToken();
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user, request);
 
         response.setStatus(HttpServletResponse.SC_OK);
         jwtService.addAccessTokenToCookie(response, accessToken);
-        jwtService.addRefreshTokenToCookie(response, refreshToken);
-        jwtService.updateRefreshToken(oAuth2User.getUserId(), refreshToken);
+        jwtService.addRefreshTokenToCookie(response, refreshToken.getToken());
 
         try {
             response.sendRedirect(REDIRECT_URL);
