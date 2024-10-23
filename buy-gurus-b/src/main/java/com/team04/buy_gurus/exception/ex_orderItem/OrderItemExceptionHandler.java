@@ -1,5 +1,6 @@
 package com.team04.buy_gurus.exception.ex_orderItem;
 
+import com.team04.buy_gurus.exception.ex_orderItem.exception.InsufficientQuantityException;
 import com.team04.buy_gurus.exception.ex_orderItem.exception.OrderItemNotFoundException;
 import com.team04.buy_gurus.exception.ex_orderItem.exception.UnauthorizedException;
 import org.springframework.http.HttpStatus;
@@ -20,5 +21,11 @@ public class OrderItemExceptionHandler {
     @ExceptionHandler(OrderItemNotFoundException.class)
     public ResponseEntity<String> handleOrderItemNotFoundException(OrderItemNotFoundException ex) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
+    // 400 에러, 재고 부족 예외 처리
+    @ExceptionHandler(InsufficientQuantityException.class)
+    public ResponseEntity<String> handleInsufficientStockException(InsufficientQuantityException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 }
