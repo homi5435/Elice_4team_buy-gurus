@@ -38,10 +38,11 @@ public class OrderItemService {
 
       OrderItem existOrderItem = orderItemRepository.findByUserAndProduct(user, product);
 
+      Long amount = request.getAmount();
+
       // 희원의 장바구니에 상품이 없다면
-      if(existOrderItem == null){
-          Long amount = product.getQuantity();
-          Long price = product.getQuantity() * product.getPrice();
+      if (existOrderItem == null) {
+          Long price = amount * product.getPrice();
 
           OrderItem orderItem = new OrderItem(amount, price, user, product);
 
@@ -49,11 +50,10 @@ public class OrderItemService {
       }
       // 희원의 장바구니에 상품이 있다면
       else{
-            existOrderItem.setAmount(existOrderItem.getAmount() + product.getQuantity());
-            existOrderItem.setPrice(existOrderItem.getAmount() + product.getQuantity()
-                                    * product.getPrice());
+          existOrderItem.setAmount(existOrderItem.getAmount() + amount);
+          existOrderItem.setPrice(existOrderItem.getAmount() * product.getPrice());
 
-            orderItemRepository.save(existOrderItem);
+          orderItemRepository.save(existOrderItem);
       }
     }
 
@@ -93,7 +93,7 @@ public class OrderItemService {
     public void patchOrderItem(Long id, Long amount) {
         OrderItem orderItem = orderItemRepository.findById(id).orElseThrow(IllegalArgumentException::new);
         orderItem.setAmount(amount);
-        
+
         orderItemRepository.save(orderItem);
     }
 
