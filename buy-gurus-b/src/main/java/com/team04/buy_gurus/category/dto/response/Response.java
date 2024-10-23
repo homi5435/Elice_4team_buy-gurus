@@ -9,16 +9,16 @@ import lombok.Getter;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter
-public class Response {
+public class Response<T> {
 
     private boolean success;
     private int code;
-    private Result result;
+    private T result;
 
 
     public static Response success(){return new Response(true, 0, null);}
 
-    public static <T> Response success(T data){return new Response(true, 0, null);}
+    public static <T> Response success(T data){return new Response(true, 0, data);}
 
     public static Response failure(int code, String msg){ return new Response(false, code, new Failure(msg));}
 }
