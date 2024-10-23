@@ -1,5 +1,6 @@
 package com.team04.buy_gurus.review.domain;
 
+import com.team04.buy_gurus.product.domain.Product;
 import com.team04.buy_gurus.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -33,10 +34,11 @@ public class Review {
     @Column(name = "modified_at")
     private LocalDateTime modifiedAt; // 수정 시간
 
-    @Column(name = "product_id")
-    private Long productId; // 상품 ID
+    @ManyToOne
+    @JoinColumn(name = "product_id", insertable = true, updatable = true)
+    private Product product; // 상품 ID
 
     @ManyToOne
-    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    @JoinColumn(name = "user_id", insertable = true, updatable = true)
     private User user; // 사용자 정보
 }
