@@ -89,7 +89,8 @@ public class OrderItemService {
                     orderItem.getProduct().getId(),
                     orderItem.getProduct().getName(),
                     orderItem.getProduct().getPrice(),
-                    imageUrl
+                    imageUrl,
+                    orderItem.getProduct().getQuantity()
             );
 
             response.add(new OrderItemResponseDto(orderItem, productResponseDto));
