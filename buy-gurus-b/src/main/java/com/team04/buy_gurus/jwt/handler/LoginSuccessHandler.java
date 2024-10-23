@@ -2,6 +2,8 @@ package com.team04.buy_gurus.jwt.handler;
 
 import com.team04.buy_gurus.exception.ex_user.ex.UserNotFoundException;
 import com.team04.buy_gurus.jwt.service.JwtService;
+import com.team04.buy_gurus.refreshtoken.entity.RefreshToken;
+import com.team04.buy_gurus.refreshtoken.service.RefreshTokenService;
 import com.team04.buy_gurus.user.CustomUserDetails;
 import com.team04.buy_gurus.user.entity.User;
 import com.team04.buy_gurus.user.repository.UserRepository;
@@ -21,6 +23,7 @@ import java.io.IOException;
 public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     private final JwtService jwtService;
+    private final RefreshTokenService refreshTokenService;
     private final UserRepository userRepository;
 
     @Override
@@ -33,15 +36,11 @@ public class LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
         User user = userRepository.findByEmail(email).orElseThrow(UserNotFoundException::new);
 
         String accessToken = jwtService.createAccessToken(user.getId(), user.getRole().getValue());
-        String refreshToken = jwtService.createRefreshToken();
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user, request);
 
         response.setStatus(HttpServletResponse.SC_OK);
         jwtService.addAccessTokenToCookie(response, accessToken);
-        jwtService.addRefreshTokenToCookie(response, refreshToken);
-
-
-        user.updateRefreshToken(refreshToken);
-        userRepository.saveAndFlush(user);
+        jwtService.addRefreshTokenToCookie(response, refreshToken.getToken());
     }
 
     private String extractUsername(Authentication authentication) {
