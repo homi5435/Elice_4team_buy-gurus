@@ -20,7 +20,7 @@ public class OrderItemController {
     private final OrderItemService orderItemService;
 
     // 장바구니 추가
-    @PostMapping("/productId}")
+    @PostMapping("/{productId}")
     public ResponseEntity<String> addOrderItem(@Valid @RequestBody OrderItemRequestDto request, @PathVariable Long productId,
                                                @AuthenticationPrincipal CustomUserDetails userDetails){
         if (userDetails == null) {
