@@ -1,11 +1,13 @@
 package com.team04.buy_gurus.product.repository;
 
 import com.team04.buy_gurus.product.domain.Product;
-import io.lettuce.core.dynamic.annotation.Param;
+import org.springframework.data.repository.query.Param;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Transactional;
 
 public interface ProductRepository extends JpaRepository<Product, Long> {
     // 대분류 전체 검색
@@ -26,4 +28,9 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     @Query("SELECT p FROM Product p WHERE p.name LIKE %:name%")
     Page<Product> findByName(@Param("name") String name, Pageable pageable);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE Product p SET p.quantity = p.quantity - :quantity WHERE p.id = :productId")
+    void discountQuantity(@Param("quantity") Long quantity, @Param("productId") Long productId);
 }
