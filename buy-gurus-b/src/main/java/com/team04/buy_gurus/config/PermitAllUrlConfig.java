@@ -22,7 +22,7 @@ public class PermitAllUrlConfig {
                 "/api/reset-password",
                 "/api/token",
                 "/api/category",
-                "/api/product"
+                "/api/product/**"
         );
     }
 }
