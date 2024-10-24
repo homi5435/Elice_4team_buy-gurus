@@ -28,7 +28,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     private final RefreshTokenService refreshTokenService;
     private final UserRepository userRepository;
 
-    private static final String REDIRECT_URL = "http://localhost:5173/home";
+    private static final String REDIRECT_URL = "https://mrfshpjrmxnfadny.tunnel-pt.elice.io/home";
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,

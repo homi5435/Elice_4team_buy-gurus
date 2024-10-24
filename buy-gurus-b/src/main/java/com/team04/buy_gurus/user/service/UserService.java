@@ -36,9 +36,6 @@ public class UserService {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new DuplicateEmailException();
         }
-        if (userRepository.findByNickname(request.getNickname()).isPresent()) {
-            throw new DuplicateNicknameException();
-        }
 
         userRepository.save(User.builder()
                 .nickname(request.getNickname())
@@ -64,7 +61,7 @@ public class UserService {
 
         return userRepository.findById(userId)
                 .map(user -> {
-                    if (userRepository.findByNickname(request.getNickname()).isEmpty()) {
+                    if (!user.getNickname().equals(request.getNickname())) {
                         user.updateNickname(request.getNickname());
                     }
                     if (userRepository.findByEmail(request.getEmail()).isEmpty()){

@@ -87,7 +87,7 @@ public class SecurityConfig {
     public UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.addAllowedOrigin("http://localhost:5173");
+        config.addAllowedOrigin("https://mrfshpjrmxnfadny.tunnel-pt.elice.io");
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
 

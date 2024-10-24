@@ -9,18 +9,18 @@ spring:
             scope: profile, email
 
           naver:
-            client-id: 네이버 클라이언트 ID
-            client-secret: 네이버 클라이언트 Secret
-            redirect-uri: http://localhost:8080/login/oauth2/code/naver (설정한 redirect URI)
+            client-id: 5xG_BVFccv28y4_Ppx36
+            client-secret: UxxkfVZ_6t
+            redirect-uri: https://qjszhpthasawfqrk.tunnel-pt.elice.io/login/oauth2/code/naver
             authorization-grant-type: authorization_code
             scope: name, email, profile_image
             client-name: Naver
 
           kakao:
-            client-id: 카카오 클라이언트 ID
-            client-secret: 카카오 클라이언트 Secret
-            redirect-uri: http://localhost:8080/login/oauth2/code/kakao (설정한 redirect URI)
-            client-authentication-method: POST
+            client-id: 3766b103b2245fe1d6598d2841f913f9
+            client-secret: sWABsUSpcr8ssb9aiXzsmNyf7nOVMsAn
+            redirect-uri: http://localhost:8080/login/oauth2/code/kakao
+            client-authentication-method: post
             authorization-grant-type: authorization_code
             scope: profile_nickname, profile_image
             client-name: Kakao
