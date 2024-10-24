@@ -1,7 +1,6 @@
 package com.team04.buy_gurus.order.service;
 
 import com.team04.buy_gurus.common.enums.CommonError;
-import com.team04.buy_gurus.exception.ex_product.exception.OutOfStockException;
 import com.team04.buy_gurus.order.domain.Order;
 import com.team04.buy_gurus.order.domain.OrderInfo;
 import com.team04.buy_gurus.order.dto.OrderRequest;

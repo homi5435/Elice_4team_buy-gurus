@@ -63,8 +63,8 @@ public class OAuthAttributes {
         return User.builder()
                 .provider(provider)
                 .providerId(oauth2UserInfo.getId())
-                .email(UUID.randomUUID() + "@socialUser.com")
-                .nickname(provider + "_" + oauth2UserInfo.getId())
+                .email(oauth2UserInfo.getEmail())
+                .nickname(oauth2UserInfo.getNickname())
                 .imageUrl(oauth2UserInfo.getImageUrl())
                 .role(Role.USER)
                 .build();

@@ -112,7 +112,7 @@ public class JwtService {
     public void addAccessTokenToCookie(HttpServletResponse response, String accessToken) {
         Cookie accessTokenCookie = new Cookie(ACCESS_TOKEN_COOKIE, accessToken);
         accessTokenCookie.setHttpOnly(true);
-        accessTokenCookie.setSecure(false);
+        accessTokenCookie.setSecure(true);
         accessTokenCookie.setPath("/");
         accessTokenCookie.setMaxAge(60 * 60);
         response.addCookie(accessTokenCookie);
@@ -121,7 +121,7 @@ public class JwtService {
     public void addRefreshTokenToCookie(HttpServletResponse response, String refreshToken) {
         Cookie refreshTokenCookie = new Cookie(REFRESH_TOKEN_COOKIE, refreshToken);
         refreshTokenCookie.setHttpOnly(true);
-        refreshTokenCookie.setSecure(false);
+        refreshTokenCookie.setSecure(true);
         refreshTokenCookie.setPath("/");
         refreshTokenCookie.setMaxAge(7 * 24 * 60 * 60);
         response.addCookie(refreshTokenCookie);
@@ -130,7 +130,7 @@ public class JwtService {
     public void removeAccessTokenToCookie(HttpServletResponse response) {
         Cookie accessTokenCookie = new Cookie(ACCESS_TOKEN_COOKIE, null);
         accessTokenCookie.setHttpOnly(true);
-        accessTokenCookie.setSecure(false);
+        accessTokenCookie.setSecure(true);
         accessTokenCookie.setPath("/");
         accessTokenCookie.setMaxAge(0);
         response.addCookie(accessTokenCookie);
@@ -139,7 +139,7 @@ public class JwtService {
     public void removeRefreshTokenToCookie(HttpServletResponse response) {
         Cookie refreshTokenCookie = new Cookie(REFRESH_TOKEN_COOKIE, null);
         refreshTokenCookie.setHttpOnly(true);
-        refreshTokenCookie.setSecure(false);
+        refreshTokenCookie.setSecure(true);
         refreshTokenCookie.setPath("/");
         refreshTokenCookie.setMaxAge(0);
         response.addCookie(refreshTokenCookie);
