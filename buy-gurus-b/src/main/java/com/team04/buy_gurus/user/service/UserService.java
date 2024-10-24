@@ -54,6 +54,7 @@ public class UserService {
         return userRepository.findById(userId)
                 .map(user -> new UserInfoResponseDto(
                         // user.getImageUrl(),
+                        user.getId(),
                         user.getNickname(),
                         user.getEmail(),
                         user.getRole()))
