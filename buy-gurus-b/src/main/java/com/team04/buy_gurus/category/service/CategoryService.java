@@ -4,6 +4,8 @@ import com.team04.buy_gurus.category.dto.CategoryCreateRequest;
 import com.team04.buy_gurus.category.dto.CategoryDto;
 import com.team04.buy_gurus.category.dto.exception.CategoryNotFoundException;
 import com.team04.buy_gurus.category.domain.Category;
+import com.team04.buy_gurus.category.dto.response.CategoryFirstCreatedResponse;
+import com.team04.buy_gurus.category.dto.response.CategorySubCreatedResponse;
 import com.team04.buy_gurus.category.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,10 +28,16 @@ public class CategoryService {
 
     //생성
     @Transactional
+    public CategoryFirstCreatedResponse createCategory(String name){
+        Category category = new Category(name, null);
+        Category categoryEntity = categoryRepository.save(category);
+        return CategoryFirstCreatedResponse.builder().name(categoryEntity.getName()).id(categoryEntity.getId()).build();
+    }
+    /*@Transactional
     public void createCategory(String name){
         Category category = new Category(name, null);
         categoryRepository.save(category);
-    }
+    }*/
 
     //삭제
     @Transactional
@@ -40,10 +48,15 @@ public class CategoryService {
 
     //수정
     @Transactional
-    public void updateCategory(final CategoryCreateRequest request){
+    public CategorySubCreatedResponse updateCategory(final CategoryCreateRequest request){
         Category parent = categoryRepository.findById(request.getParentId()) // request 의 parentId를 가지고 카테고리 찾기
                 .orElseThrow(CategoryNotFoundException::new);
-        categoryRepository.save(new Category(request.getName(), parent));
+        Category categoryEntity = categoryRepository.save(new Category(request.getName(), parent));
+        return CategorySubCreatedResponse.builder()
+                .name(categoryEntity.getName())
+                .parentId(categoryEntity.getParent().getId())
+                .id(categoryEntity.getId())
+                .build();
 
     }
 

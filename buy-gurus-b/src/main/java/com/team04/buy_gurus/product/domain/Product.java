@@ -1,5 +1,7 @@
 package com.team04.buy_gurus.product.domain;
 
+import com.team04.buy_gurus.category.domain.Category;
+import com.team04.buy_gurus.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,6 +10,8 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
+
+import java.util.List;
 
 @Entity
 @Table(name = "product")
@@ -45,19 +49,14 @@ public class Product {
     @Column(nullable = false)
     private Long quantity;
 
-    @Column(nullable = false)
-    private String category;
+    @ManyToOne
+    @JoinColumn(name = "category_id", referencedColumnName = "id", insertable = true, updatable = true)
+    private Category category;
 
-    //TODO 카테고리, 판매자 정보 가져오기
-//    @ManyToOne
-//    @JoinColumn(name = "category_id", referencedColumnName = "id", insertable = false, updatable = false)
-//    private Category category;
-//
-//    @ManyToOne
-//    @JoinColumn(name = "seller_id", referencedColumnName = "id", insertable = false, updatable = false)
-//    private Seller seller;
+    @ManyToOne
+    @JoinColumn(name = "seller_id", referencedColumnName = "id", insertable = true, updatable = true)
+    private User seller;
 
-    //판매자 아이디
-    @Column(name = "seller_id")
-    private Long sellerId;
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    private List<ProductImage> productImages;
 }

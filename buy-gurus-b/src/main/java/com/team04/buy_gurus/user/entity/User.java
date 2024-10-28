@@ -1,11 +1,12 @@
 package com.team04.buy_gurus.user.entity;
 
-import com.team04.buy_gurus.sellerinfo.entity.SellerInfo;
+import com.team04.buy_gurus.refreshtoken.entity.RefreshToken;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -21,7 +22,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
+    @Column
     private String nickname;
 
     @Column(unique = true)
@@ -44,15 +45,8 @@ public class User {
     @Column(name = "provide_id", nullable = true)
     private String providerId;
 
-    @Column(name = "refresh_token", nullable = true)
-    private String refreshToken;
-
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-    private SellerInfo sellerInfo;
-
-    public void updateRefreshToken(String refreshToken) {
-        this.refreshToken = refreshToken;
-    }
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RefreshToken> refreshTokens= new ArrayList<>();
 
     public void updateNickname(String nickname){
         this.nickname = nickname;
@@ -62,16 +56,8 @@ public class User {
         this.email = email;
     }
 
-    public void updateRole(){
-        this.role = Role.SELLER;
-    }
-
     public void updatePassword(String password) {
         this.password = password;
-    }
-
-    public void updateSellerInfo(SellerInfo sellerInfo){
-        this.sellerInfo = sellerInfo;
     }
 }
 

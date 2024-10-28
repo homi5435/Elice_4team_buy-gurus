@@ -14,13 +14,15 @@ public class PermitAllUrlConfig {
                 "/images/**",
                 "/js/**",
                 "/favicon.ico",
-                "/h2-console",
+                "/h2-console/**",
                 "/api/login",
                 "/api/signup",
                 "/oauth2/authorization/**",
                 "/api/auth/**",
                 "/api/reset-password",
-                "/api/token"
+                "/api/token",
+                "/api/category",
+                "/api/product/**"
         );
     }
 }

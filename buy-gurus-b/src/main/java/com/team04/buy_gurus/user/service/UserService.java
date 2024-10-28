@@ -4,8 +4,6 @@ import com.team04.buy_gurus.exception.ex_user.ex.DuplicateEmailException;
 import com.team04.buy_gurus.exception.ex_user.ex.DuplicateNicknameException;
 import com.team04.buy_gurus.exception.ex_user.ex.UnverifiedEmailException;
 import com.team04.buy_gurus.exception.ex_user.ex.UserNotFoundException;
-import com.team04.buy_gurus.sellerinfo.entity.SellerInfo;
-import com.team04.buy_gurus.sellerinfo.repository.SellerInfoRepository;
 import com.team04.buy_gurus.user.dto.*;
 import com.team04.buy_gurus.user.entity.Provider;
 import com.team04.buy_gurus.user.entity.Role;
@@ -29,7 +27,6 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final StringRedisTemplate redisTemplate;
-    private final SellerInfoRepository sellerInfoRepository;
 
     @Transactional
     public void signup(SignupRequestDto request) {
@@ -38,9 +35,6 @@ public class UserService {
 
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new DuplicateEmailException();
-        }
-        if (userRepository.findByNickname(request.getNickname()).isPresent()) {
-            throw new DuplicateNicknameException();
         }
 
         userRepository.save(User.builder()
@@ -57,6 +51,7 @@ public class UserService {
         return userRepository.findById(userId)
                 .map(user -> new UserInfoResponseDto(
                         // user.getImageUrl(),
+                        user.getId(),
                         user.getNickname(),
                         user.getEmail(),
                         user.getRole()))
@@ -67,7 +62,7 @@ public class UserService {
 
         return userRepository.findById(userId)
                 .map(user -> {
-                    if (userRepository.findByNickname(request.getNickname()).isEmpty()) {
+                    if (!user.getNickname().equals(request.getNickname())) {
                         user.updateNickname(request.getNickname());
                     }
                     if (userRepository.findByEmail(request.getEmail()).isEmpty()){
@@ -78,30 +73,6 @@ public class UserService {
                     return new UserEditResponseDto(request.getNickname(), request.getEmail());
                 })
                 .orElseThrow(UserNotFoundException::new);
-    }
-
-    public void sellerRegistration(Long userId) {
-        // TODO
-        // 중복 Seller 가입 체크를 깔끔하게 작성!
-        Optional<User> user = userRepository.findById(userId);
-
-        user.ifPresentOrElse(User::updateRole,
-                () -> {
-                    throw new UserNotFoundException();
-                }
-        );
-
-        // 간단한 중복 Seller 가입 체크
-        /*sellerInfoRepository.findByUseremail(email).ifPresentOrElse(si -> {}, () -> {
-            User sellerUser = user.get();
-            SellerInfo sellerInfo = SellerInfo.builder()
-                    .user(sellerUser)
-                    .build();
-            sellerInfoRepository.save(sellerInfo);
-            sellerUser.updateSellerInfo(sellerInfo);
-        });*/
-
-
     }
 
     public void resetPassword(ResetPasswordRequestDto request) {

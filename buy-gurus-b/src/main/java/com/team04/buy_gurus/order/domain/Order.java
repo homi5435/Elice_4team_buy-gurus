@@ -1,14 +1,11 @@
 package com.team04.buy_gurus.order.domain;
 
-import com.team04.buy_gurus.address.domain.AddressInfo;
 import com.team04.buy_gurus.order.dto.OrderUpdateRequest;
-import com.team04.buy_gurus.sellerinfo.entity.SellerInfo;
 import com.team04.buy_gurus.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
@@ -39,6 +36,7 @@ public class Order {
     private boolean isDeleted;
 
     // 주문 상태
+    @Builder.Default
     @Enumerated(EnumType.STRING)
     @ColumnDefault("'PROCESSING'")
     private Status status = Status.PROCESSING;
@@ -51,16 +49,16 @@ public class Order {
 
     // 주문자 정보
     @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    @JoinColumn(name = "buyer_id")
+    private User buyer;
     private String shippingAddress;
     private String customerName;
     private String customerPhoneNum;
 
     // 판매자 정보
     @ManyToOne
-    @JoinColumn(name = "seller_info_id")
-    private SellerInfo sellerInfo;
+    @JoinColumn(name = "seller_id")
+    private User seller;
     private String sellerName;
     private String sellerPhoneNum;
     private String sellerCompany;
@@ -101,11 +99,11 @@ public class Order {
         this.orderInfoList = orderInfoList;
     }
 
-    public void setSeller(SellerInfo sellerInfo) {
-        this.sellerInfo = sellerInfo;
-        this.sellerCompany = sellerInfo.getTradeName();
-        this.sellerName = sellerInfo.getUser().getNickname();
-        this.sellerPhoneNum = sellerInfo.getBusinessPhoneNum();
+    public void setSeller(User seller) {
+        this.seller = seller;
+        this.sellerCompany = "buy gurus";
+        this.sellerName = "buy gurus";
+        this.sellerPhoneNum = "010-0000-0000";
     }
 
     public static Status fromString(String status) {

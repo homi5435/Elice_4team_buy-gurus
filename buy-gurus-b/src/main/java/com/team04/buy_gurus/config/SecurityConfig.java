@@ -12,6 +12,7 @@ import com.team04.buy_gurus.jwt.service.LoginService;
 import com.team04.buy_gurus.oauth.service.CustomOAuth2UserService;
 import com.team04.buy_gurus.oauth.handler.OAuth2LoginFailureHandler;
 import com.team04.buy_gurus.oauth.handler.OAuth2LoginSuccessHandler;
+import com.team04.buy_gurus.refreshtoken.service.RefreshTokenService;
 import com.team04.buy_gurus.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -40,6 +41,7 @@ public class SecurityConfig {
 
     private final LoginService loginService;
     private final JwtService jwtService;
+    private final RefreshTokenService refreshTokenService;
     private final UserRepository userRepository;
     private final ObjectMapper objectMapper;
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
@@ -63,7 +65,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(permitAllUrlConfig.getPermitAllUrls().toArray(String[]::new)).permitAll()
-                        //.requestMatchers("/api/category").hasAuthority("ROLE_ADMIN")
+                        //.requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
@@ -85,7 +87,7 @@ public class SecurityConfig {
     public UrlBasedCorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.addAllowedOrigin("http://localhost:5173");
+        config.addAllowedOrigin("https://mrfshpjrmxnfadny.tunnel-pt.elice.io");
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
 
@@ -109,7 +111,7 @@ public class SecurityConfig {
 
     @Bean
     public LoginSuccessHandler loginSuccessHandler() {
-        return new LoginSuccessHandler(jwtService, userRepository);
+        return new LoginSuccessHandler(jwtService, refreshTokenService, userRepository);
     }
 
     @Bean
@@ -132,7 +134,6 @@ public class SecurityConfig {
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationProcessingFilter() {
-        JwtAuthenticationFilter jwtAuthenticationFilter = new JwtAuthenticationFilter(jwtService, userRepository, permitAllUrlConfig);
-        return jwtAuthenticationFilter;
+        return new JwtAuthenticationFilter(jwtService, userRepository, permitAllUrlConfig);
     }
 }

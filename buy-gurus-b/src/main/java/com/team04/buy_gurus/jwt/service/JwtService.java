@@ -42,18 +42,9 @@ public class JwtService {
     public String createAccessToken(Long userId, String role) {
         Date now = new Date();
         return JWT.create()
-                .withSubject(ACCESS_TOKEN_SUBJECT)
+                .withSubject(userId.toString())
                 .withExpiresAt(new Date(now.getTime() + jwtProperties.getAccessTokenExpiration()))
-                .withClaim(USER_ID_CLAIM, userId)
                 .withClaim(ROLE_CLAIM, role)
-                .sign(Algorithm.HMAC512(jwtProperties.getSecretKey()));
-    }
-
-    public String createRefreshToken() {
-        Date now = new Date();
-        return JWT.create()
-                .withSubject(REFRESH_TOKEN_SUBJECT)
-                .withExpiresAt(new Date(now.getTime() + jwtProperties.getRefreshTokenExpiration()))
                 .sign(Algorithm.HMAC512(jwtProperties.getSecretKey()));
     }
 
@@ -83,11 +74,12 @@ public class JwtService {
 
     public Optional<Long> extractUserId(String accessToken) {
         try {
-            return Optional.ofNullable(JWT.require(Algorithm.HMAC512(jwtProperties.getSecretKey()))
+            String userId = JWT.require(Algorithm.HMAC512(jwtProperties.getSecretKey()))
                     .build()
                     .verify(accessToken)
-                    .getClaim(USER_ID_CLAIM)
-                    .asLong());
+                    .getSubject();
+
+            return Optional.ofNullable(Long.valueOf(userId));
         } catch (Exception e) {
             return Optional.empty();
         }
@@ -105,19 +97,6 @@ public class JwtService {
         }
     }
 
-    public void updateRefreshToken(Long userId, String refreshToken) {
-        userRepository.findById(userId)
-                .ifPresentOrElse(
-                        user -> {
-                            user.updateRefreshToken(refreshToken);
-                            userRepository.saveAndFlush(user);
-                        },
-                        () -> {
-                            throw new UserNotFoundException();
-                        }
-                );
-    }
-
     public boolean isTokenValid(String token) {
         try {
             JWT.require(Algorithm.HMAC512(jwtProperties.getSecretKey())).build().verify(token);
@@ -133,7 +112,7 @@ public class JwtService {
     public void addAccessTokenToCookie(HttpServletResponse response, String accessToken) {
         Cookie accessTokenCookie = new Cookie(ACCESS_TOKEN_COOKIE, accessToken);
         accessTokenCookie.setHttpOnly(true);
-        accessTokenCookie.setSecure(false);
+        accessTokenCookie.setSecure(true);
         accessTokenCookie.setPath("/");
         accessTokenCookie.setMaxAge(60 * 60);
         response.addCookie(accessTokenCookie);
@@ -142,7 +121,7 @@ public class JwtService {
     public void addRefreshTokenToCookie(HttpServletResponse response, String refreshToken) {
         Cookie refreshTokenCookie = new Cookie(REFRESH_TOKEN_COOKIE, refreshToken);
         refreshTokenCookie.setHttpOnly(true);
-        refreshTokenCookie.setSecure(false);
+        refreshTokenCookie.setSecure(true);
         refreshTokenCookie.setPath("/");
         refreshTokenCookie.setMaxAge(7 * 24 * 60 * 60);
         response.addCookie(refreshTokenCookie);
@@ -151,7 +130,7 @@ public class JwtService {
     public void removeAccessTokenToCookie(HttpServletResponse response) {
         Cookie accessTokenCookie = new Cookie(ACCESS_TOKEN_COOKIE, null);
         accessTokenCookie.setHttpOnly(true);
-        accessTokenCookie.setSecure(false);
+        accessTokenCookie.setSecure(true);
         accessTokenCookie.setPath("/");
         accessTokenCookie.setMaxAge(0);
         response.addCookie(accessTokenCookie);
@@ -160,32 +139,9 @@ public class JwtService {
     public void removeRefreshTokenToCookie(HttpServletResponse response) {
         Cookie refreshTokenCookie = new Cookie(REFRESH_TOKEN_COOKIE, null);
         refreshTokenCookie.setHttpOnly(true);
-        refreshTokenCookie.setSecure(false);
+        refreshTokenCookie.setSecure(true);
         refreshTokenCookie.setPath("/");
         refreshTokenCookie.setMaxAge(0);
         response.addCookie(refreshTokenCookie);
-    }
-
-    public void tokenReissue(HttpServletRequest request, HttpServletResponse response) throws IOException {
-
-        String refreshToken = extractRefreshToken(request)
-                .filter(this::isTokenValid)
-                .orElse(null);
-
-        if (refreshToken != null) {
-            User user = userRepository.findByRefreshToken(refreshToken)
-                    .orElseThrow(UserNotFoundException::new);
-
-            String newAccessToken = createAccessToken(user.getId(), user.getRole().getValue());
-            String newRefreshToken = createRefreshToken();
-
-            user.updateRefreshToken(newRefreshToken);
-            userRepository.saveAndFlush(user);
-
-            addAccessTokenToCookie(response, newAccessToken);
-            addRefreshTokenToCookie(response, newRefreshToken);
-        } else {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
-        }
     }
 }

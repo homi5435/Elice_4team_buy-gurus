@@ -54,13 +54,6 @@ public class UserController {
             return ResponseEntity.ok(new UserResponse<>("회원 정보 수정 성공", response));
     }
 
-    @PatchMapping("/seller-registration")
-    public ResponseEntity<UserResponse<Void>> updateRole(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
-
-        userService.sellerRegistration(customUserDetails.getUserId());
-        return ResponseEntity.ok(new UserResponse<>("판매자 등록 성공", null));
-    }
-
     @PatchMapping("/reset-password")
     public ResponseEntity<UserResponse<Void>> updatePassword(@RequestBody @Valid ResetPasswordRequestDto request) {
 
@@ -69,11 +62,14 @@ public class UserController {
     }
 
     @DeleteMapping("/userMe")
-    public ResponseEntity<UserResponse<Void>> deleteUser(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
+    public ResponseEntity<UserResponse<Void>> deleteUser(@AuthenticationPrincipal CustomUserDetails customUserDetails, HttpServletResponse response) {
 
-            userService.withdrawal(customUserDetails.getUserId());
-            return ResponseEntity.status(HttpStatus.NO_CONTENT)
-                    .body(new UserResponse<>("회원 탈퇴 성공", null));
+        userService.withdrawal(customUserDetails.getUserId());
+        jwtService.removeAccessTokenToCookie(response);
+        jwtService.removeRefreshTokenToCookie(response);
+
+        return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                .body(new UserResponse<>("회원 탈퇴 성공", null));
     }
 
     @PostMapping("/logout")
@@ -84,12 +80,4 @@ public class UserController {
 
         return ResponseEntity.ok(new UserResponse<>("로그아웃 성공", null));
     }
-
-    @PostMapping("/token")
-    public ResponseEntity<UserResponse<Void>> tokenReissue(HttpServletRequest request, HttpServletResponse response) throws IOException{
-
-        jwtService.tokenReissue(request, response);
-        return ResponseEntity.ok(new UserResponse<>("토큰 재발급 성공", null));
-    }
-
 }
