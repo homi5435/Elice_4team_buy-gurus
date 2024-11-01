@@ -99,3 +99,9 @@ Buy-Gurus는 전자기기 전자상거래 플랫폼으로, 사용자들이 다�
 
 - **Redis**
   - `spring-boot-starter-data-redis`
+
+
+
+## API 명세서
+### 접속 관리
+- [API명세서 링크](https://www.notion.so/elice-track/API-3736518d004341ffb20e39cedd8975d1)
