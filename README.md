@@ -16,7 +16,7 @@ Buy-Gurus는 전자기기 전자상거래 플랫폼으로, 사용자들이 다�
 - [ERD 링크](https://www.erdcloud.com/d/XEQxhup44GQxREX7b)
 
 ## System Architecture
-![architecture1](/uploads/fa07492c46a785b3e1f45f53e05dea1d/architecture1.png)
+![architecture1](https://github.com/user-attachments/assets/d04cc35d-21e3-4feb-9feb-76e21060b68a)
 
 ## 기술 스택
 - **Frontend**: Bootstrap, React
