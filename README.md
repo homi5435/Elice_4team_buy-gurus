@@ -34,7 +34,7 @@ Buy-Gurus는 전자기기 전자상거래 플랫폼으로, 사용자들이 다�
 ```
 - 서버 : GCP VM
     - OS: Ubuntu 20.04.6 LTS(GCP)
-    - JRE: OpenJDK 22
+    - JRE: OpenJDK 17
     - 애플리케이션 서버: Spring Boot (내장 Tomcat 사용)
 - 데이터베이스: AWS RDS (MySQL)
     - MySQL 버전: 8.0.35
@@ -48,7 +48,7 @@ Buy-Gurus는 전자기기 전자상거래 플랫폼으로, 사용자들이 다�
 - 운영체제: Windows 11, macOS Sonoma
 - IDE: IntelliJ IDEA
 - 빌드 도구: Gradle
-- JDK 버전: JDK 22
+- JDK 버전: JDK 17
 - 버전 관리: Git / Gitlab
 - 기타 툴: Postman (API 테스트), Lombok
 ```
